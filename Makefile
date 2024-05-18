@@ -1,3 +1,5 @@
+export ARCH=arm
+export CROSS_COMPILE=arm-linux-gnueabihf-
 # SPDX-License-Identifier: GPL-2.0
 VERSION = 4
 PATCHLEVEL = 19

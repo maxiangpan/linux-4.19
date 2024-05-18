@@ -699,12 +699,17 @@ asmlinkage __visible void __init start_kernel(void)
 	 * this. But we do want output early, in case something goes wrong.
 	 */
 	console_init();
+	printk("\n");
 	printk("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n");
 	printk("mxp's kernel : initing~\n");
+	printk("\n");
+	printk("\n");
+	
 	if (panic_later)
 		panic("Too many boot %s vars at `%s'", panic_later,
 		      panic_param);
 
+	// 初始化锁
 	lockdep_init();
 
 	/*
@@ -712,6 +717,8 @@ asmlinkage __visible void __init start_kernel(void)
 	 * to self-test [hard/soft]-irqs on/off lock inversion bugs
 	 * too:
 	 */
+
+	 //
 	locking_selftest();
 
 #ifdef CONFIG_BLK_DEV_INITRD
@@ -723,42 +730,71 @@ asmlinkage __visible void __init start_kernel(void)
 		initrd_start = 0;
 	}
 #endif
+	// 初始化kmemleak
 	kmemleak_init();
+	// 初始化debug objects的内存
 	debug_objects_mem_init();
+	// 设置per cpu pageset
 	setup_per_cpu_pageset();
+	// 初始化numa policy
 	numa_policy_init();
+	// 初始化acpi early
 	acpi_early_init();
 	if (late_time_init)
 		late_time_init();
+	// 初始化调度时钟
 	sched_clock_init();
+	// 校准延迟
 	calibrate_delay();
 
+	// 完成cpu初始化
 	arch_cpu_finalize_init();
 
+	// 初始化pid和idr
 	pid_idr_init();
+	// 初始化隐藏的内存映射
 	anon_vma_init();
 #ifdef CONFIG_X86
 	if (efi_enabled(EFI_RUNTIME_SERVICES))
 		efi_enter_virtual_mode();
 #endif
+	// 初始化线程栈缓存
 	thread_stack_cache_init();
+	// 初始化凭证
 	cred_init();
+	// 初始化 fork
 	fork_init();
+	// 初始化进程缓存
 	proc_caches_init();
+	// 初始化 uts 名Space
 	uts_ns_init();
+	// 初始化缓冲区
 	buffer_init();
+	// 初始化密钥
 	key_init();
+	// 初始化安全
 	security_init();
+	// 初始化调试
 	dbg_late_init();
+	// 初始化 vfs 缓存
 	vfs_caches_init();
+	// 初始化页面缓存
 	pagecache_init();
+	// 初始化信号
 	signals_init();
+	// 初始化序列文件
 	seq_file_init();
+	// 初始化进程根
 	proc_root_init();
+	// 初始化 nsfs
 	nsfs_init();
+	// 初始化 cpuset
 	cpuset_init();
+	// 初始化 cgroup
 	cgroup_init();
+	// 初始化任务统计
 	taskstats_init_early();
+	// 初始化延迟计数
 	delayacct_init();
 
 
