@@ -1,2 +1,3 @@
-#bear -- make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vexpress_defconfig
-bear -- make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -j8
+sudo mount -t ext3 a9rootfs.ext3 tmpfs/ -o loop
+sudo cp -r rootfs/*  tmpfs/
+sudo umount tmpfs

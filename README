@@ -1,41 +1,5 @@
-Linux kernel
-============
+#虚拟机创建
+#https://blog.csdn.net/amateurSU/article/details/134031150
 
-There are several guides for kernel developers and users. These guides can
-be rendered in a number of formats, like HTML and PDF. Please read
-Documentation/admin-guide/README.rst first.
-
-In order to build the documentation, use ``make htmldocs`` or
-``make pdfdocs``.  The formatted documentation can also be read online at:
-
-    https://www.kernel.org/doc/html/latest/
-
-There are various text files in the Documentation/ subdirectory,
-several of them using the Restructured Text markup notation.
-See Documentation/00-INDEX for a list of what is contained in each file.
-
-Please read the Documentation/process/changes.rst file, as it contains the
-requirements for building and running the kernel, and information about
-the problems which may result by upgrading your kernel.
-
-
-
-使用 vexpress-a9 这款开发板。vexpress-a9 是 Arm 公司自己设计的一款 4 核 Cortex-A9 开发板，U-Boot、Linux Kernel 和 QEMU 对这款开发板都做了完整的支持。
-
-解压：
-
-tar -xvf linux-5.10.tar.xz
-
-在解压后的linux-5.10目录下，生成vexpress开发板子的config文件：
-
-cd linux-5.10
-
-make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vexpress_defconfig
-
-编译32位kernel：
-
-make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm
-
-生成的内核镱像位于arch/arm/boot/zImage
-
-设备树 arch/arm/boot/dts/vexpress-v2p-ca9.dtb
+#具体指令
+#https://blog.csdn.net/kill150/article/details/135816787
