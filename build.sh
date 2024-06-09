@@ -131,8 +131,8 @@ function start_qemu(){
     -device virtio-net-device,netdev=eth0 \
     -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
     -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
-    -device i2c-host,bus=sysbus.0,addr=0x50 \
-    -device i2c-eeprom,bus=i2c-bus.0,size=256 
+    #-device i2c-host,bus=sysbus.0,addr=0x50 \
+    #-device i2c-eeprom,bus=i2c-bus.0,size=256 
 }
 
 # 将所有参数存储到数组中 默认为all
