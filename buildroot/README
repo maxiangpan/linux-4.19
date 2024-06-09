@@ -1,3 +1,9 @@
+buildroot的编译选项详情在
+https://blog.csdn.net/qq_28877125/article/details/130652435
+
+
+
+****************************************************************************
 Buildroot is a simple, efficient and easy-to-use tool to generate embedded
 Linux systems through cross-compilation.
 
