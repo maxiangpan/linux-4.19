@@ -21,7 +21,7 @@ function check_config(){
 
 function finish_build(){
 	echo "Running ${FUNCNAME[1]} succeeded."
-	cd $TOP_DIR
+	cd $CURRENT_DIR
 }
 
 function config(){
@@ -89,6 +89,8 @@ function build_buildroot(){
     
     make $BUILDROOT_DEFCONFIG
     /usr/bin/time -f "you take %E to build" make -j$TE_JOBS
+
+    finish_build
 }
 
 function build_all(){
@@ -107,9 +109,10 @@ function build_all(){
 	#echo "TARGET_RAMBOOT_CONFIG=$RK_CFG_RAMBOOT"
 	echo "============================================"
 
-    build_uboot
-    build_kernel
     build_buildroot
+    build_uboot    
+    build_kernel
+
     finish_build
 }
 
@@ -131,6 +134,7 @@ function start_qemu(){
     -device virtio-net-device,netdev=eth0 \
     -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
     -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
+    -device i2c-bus \
     #-device i2c-host,bus=sysbus.0,addr=0x50 \
     #-device i2c-eeprom,bus=i2c-bus.0,size=256 
 }
