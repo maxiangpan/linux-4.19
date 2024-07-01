@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #make ARCH=arm64 CROSS_COMPILE=/home/mxp/Desktop/linux/buildroot-2024.02.2/output/host/bin/aarch64-buildroot-linux-gnu- -j4
+set -e  # 这将使脚本在任何命令返回非零状态时立即退出
 CURRENT_DIR=$(pwd)
 NPROC=`nproc`
 export TE_JOBS=$NPROC
@@ -34,14 +35,14 @@ function config(){
     TE_CROSS_COMPILE=${CURRENT_DIR}/buildroot/output/host/bin/aarch64-buildroot-linux-gnu-
 }
 
-function build_kernel(){ 
-    #make CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
-    make $KERNEL_DEFCONFIG
-    #make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE LOADADDR=0x60003000 uImage -j4
-    make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j4
+# function build_kernel(){ 
+#     #make CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
+#     make $KERNEL_DEFCONFIG
+#     #make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE LOADADDR=0x60003000 uImage -j4
+#     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j4
 
-    finish_build
-}
+#     finish_build
+# }
 
 function build_kernel(){ 
     check_config KERNEL_DEFCONFIG || return 0
@@ -68,13 +69,16 @@ function build_uboot(){
     cd u-boot
     rm -f *_loader_*.bin
 
-    if [ -f "configs/${RK_UBOOT_DEFCONFIG}_defconfig" ]; then
+    if [ -f "configs/${UBOOT_DEFCONFIG}" ]; then
         #make ${UBOOT_DEFCONFIG}_defconfig
-        make UBOOT_DEFCONFIG
+        make $UBOOT_DEFCONFIG
     fi
 
+    echo "ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE"
     if [ -n "$TE_CROSS_COMPILE" ];then
-        make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE all
+        #qemu可以使用arm-linux-gnueabihf- 不知道何时使用arm64
+        #make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE all
+        make CROSS_COMPILE=arm-linux-gnueabihf- all
     fi
 
     finish_build
