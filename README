@@ -1,12 +1,13 @@
 #虚拟机创建
-#https://blog.csdn.net/amateurSU/article/details/134031150
+# https://blog.csdn.net/amateurSU/article/details/134031150
 
 #具体指令
-#https://blog.csdn.net/kill150/article/details/135816787
+# https://blog.csdn.net/kill150/article/details/135816787
 
 
 #编译buildroot
-#最后一项https://blog.csdn.net/icemou/article/details/132474042
+# #error的问题 https://www.cnblogs.com/haiyang21/p/10828134.html
+# 最后一项 https://blog.csdn.net/icemou/article/details/132474042
 
 # buildroot/fs/common.mk
 #PATH=$$(BR_PATH) FAKEROOTDONTTRYCHOWN=1 /usr/bin/fakeroot -- $$(FAKEROOT_SCRIPT)

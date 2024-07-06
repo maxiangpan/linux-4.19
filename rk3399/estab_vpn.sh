@@ -22,4 +22,5 @@ echo "  export https_proxy=windows_ip:port"
 echo "  like : export https_proxy=http://192.168.1.5:7897"
 echo "*************************************************"
 export https_proxy=http://192.168.1.5:7897
+export http_proxy=http://192.168.1.5:7897
 

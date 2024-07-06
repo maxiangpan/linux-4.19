@@ -30,4 +30,72 @@ Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Conn
 Retrying.
 
 --2024-07-07 00:33:14--  (try: 7)  https://get.docker.com/
-Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... 
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 00:37:35--  (try: 8)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 00:41:59--  (try: 9)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 00:46:24--  (try:10)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 00:50:48--  (try:11)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 00:55:13--  (try:12)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 00:59:37--  (try:13)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 01:04:02--  (try:14)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 01:08:26--  (try:15)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 01:12:51--  (try:16)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 01:17:15--  (try:17)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 01:21:40--  (try:18)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 01:26:04--  (try:19)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Retrying.
+
+--2024-07-07 01:30:28--  (try:20)  https://get.docker.com/
+Connecting to get.docker.com (get.docker.com)|2a03:2880:f102:183:face:b00c:0:25de|:443... failed: Connection timed out.
+Connecting to get.docker.com (get.docker.com)|208.101.60.87|:443... failed: Connection timed out.
+Giving up.
+

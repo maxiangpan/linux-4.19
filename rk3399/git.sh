@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+echo "creat vscode ssh ...."
+
+#ssh-keygen
+
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDMhW2XL3baai6UwfVu8Z/5fM0cinR08F+63diRpcwkncN815IRF45XLM5MrHMsXi2IxsPh96CleTx+u5XnrhhmLjeLDmMI/SMYw3ZzIki9wgI8Dfm8BBydkcpsOSmxihHDx1ojf3WxygQxrG2k0SmZrfzyU/ZBWSAqkQz5GBMWa6sCgcQrJLjim5Jp+jBs0WfsQrJc20z1PaflkOy/wkaVaL3MKumxzA9i0ik8fBLIoiiC+ptZr9POXT/3nDXbc76qp6lqVT0dnufYSZna6qAlBQSzPy45F4mLfJJ5AEt8maEjXLvILq6Keb53ltaK2b9DRJEdnQ20FiQ1GfAdbWcQ0bl4IMx33s2scHh/uY27glW6pJz4OfgTeTZeWCe/YCNRSzowYGkOCBterHVziIH5C341ZvqY2gJZ60ue5+V9uVWM8NAvrORtKLcmkk8tywqFRyfX+DUe8el2QSZTaLKW7rkEEqIDsXLh85B7pqk/WSUMWSrrMCUutmTfd1csTiE= direpant@LAPTOP-30626C2N" >> /home/$USER/.ssh/authorized_keys
