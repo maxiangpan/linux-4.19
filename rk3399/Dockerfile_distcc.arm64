@@ -1,0 +1,15 @@
+FROM ubuntu:bionic
+MAINTAINER Firefly <service@t-firefly.com>
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends --no-install-suggests \
+	gcc distcc\
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists
+
+EXPOSE 3632
+
+ENTRYPOINT ["/usr/bin/distccd"]
+CMD ["--no-detach" , "--log-stderr" , "--log-level", "debug", "--allow" , "0.0.0.0/0"]
