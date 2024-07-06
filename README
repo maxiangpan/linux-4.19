@@ -17,6 +17,10 @@
 #指定kernel必须要buildroot的工具链同时需要arm64
 
 
+#qemu v7.2 network backend ‘user‘ is not compiled into this binary
+#sudo apt-get install libslirp-dev
+#./configure --enable-slirp
+
 
 #qemu启动 使用busybox
     qemu-system-arm -M vexpress-a9 -m 512M \

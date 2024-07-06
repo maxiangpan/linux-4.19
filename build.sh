@@ -56,6 +56,7 @@ function build_kernel(){
 
     cd kernel
     
+    make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE $KERNEL_DEFCONFIG
     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
 
     finish_build
