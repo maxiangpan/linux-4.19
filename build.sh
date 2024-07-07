@@ -31,8 +31,13 @@ function config(){
     UBOOT_DEFCONFIG=te_defconfig
     KERNEL_DTS=te_vxpress
 
-    TE_ARCH=arm64
-    TE_CROSS_COMPILE=${CURRENT_DIR}/buildroot/output/host/bin/aarch64-buildroot-linux-gnu-
+    TE_ARCH=arm
+    if [ "$TE_ARCH" = "arm64" ]; then
+        TE_CROSS_COMPILE=aarch64-linux-gnu- #qemu arm64 编译环境
+    else
+        TE_CROSS_COMPILE=arm-linux-gnueabihf- #arm编译环境
+    fi
+    #TE_CROSS_COMPILE=${CURRENT_DIR}/buildroot/output/host/bin/aarch64-buildroot-linux-gnu-
 }
 
 # function build_kernel(){ 
@@ -57,7 +62,15 @@ function build_kernel(){
     cd kernel
     
     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE $KERNEL_DEFCONFIG
-    make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
+    make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE dtbs
+    #当前的arm64体系架构已经不支持zImage和uImage的编译目标
+    #可使用mkimage工具给不经压缩的Image镜像加上uboot头部信息
+    #生成uImage启动镜像，由u-boot来启动。
+    if [ "$TE_ARCH" = "arm64" ]; then
+        make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE LOADADDR=0x60008000 -j$TE_JOBS
+    else
+        make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE LOADADDR=0x60008000 bzImage -j$TE_JOBS
+    fi
 
     finish_build
 }
@@ -124,24 +137,54 @@ function build_all(){
 function start_qemu(){
     echo "star qemu ..."
 
+    # 没有用户名和主机名 export PS1='[\u@\h \W]\$'
     #https://blog.csdn.net/duapple/article/details/128509624
+    #共享文件 https://blog.csdn.net/sinat_38201303/article/details/108062939
+    #uboot引导内核启动 https://zhuanlan.zhihu.com/p/676252968
     #-append "console=ttyAMA0 kmemleak=on loglevel=8" \
     #-dtb  ${CURRENT_DIR}/kernel/arch/arm/boot/dts/vexpress-v2p-ca9.dtb \
     #-kernel ${CURRENT_DIR}/u-boot/u-boot \
-    exec qemu-system-aarch64 -M virt \
-    -cpu cortex-a53 \
-    -machine type=virt\
-    -nographic \
-    -smp 2 -m 512 \
-    -kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
-    -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
-    -netdev user,id=eth0 \
-    -device virtio-net-device,netdev=eth0 \
-    -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
-    -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
-    -device i2c-bus \
-    #-device i2c-host,bus=sysbus.0,addr=0x50 \
-    #-device i2c-eeprom,bus=i2c-bus.0,size=256 
+    if [ "$TE_ARCH" = "arm64" ]; then
+    #--fsdev local,id=kmod_dev,path=$PWD/kmodules,security_model=none`
+    #创建一个本地文件系统设备，其中`id`指定设备ID，`path`指定设备挂载的本地路径，`security_model`指定安全模型。
+    
+    #-device virtio-9p-device,fsdev=kmod_dev,mount_tag=kmod_mount`
+    #将本地文件系统设备挂载到虚拟机中，其中`fsdev`指定设备ID，`mount_tag`指定设备挂载的标签。
+        exec qemu-system-aarch64 -M virt \
+        -cpu cortex-a57 \
+        -machine type=virt \
+        -nographic \
+        -smp 2 -m 2048 \
+        -kernel ${CURRENT_DIR}/u-boot/u-boot \
+        -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
+        -sd ${CURRENT_DIR}/devices/sd.img \
+        -netdev user,id=eth0 \
+        -device virtio-net-device,netdev=eth0 \
+        -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
+        -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
+        #-kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
+        #-kernel ${CURRENT_DIR}/u-boot/u-boot \
+        #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
+        #-device i2c-bus \
+        #-device i2c-host,bus=sysbus.0,addr=0x50 \
+        #-device i2c-eeprom,bus=i2c-bus.0,size=256 
+    fi
+
+    # arm编译环境
+    if [ "$TE_ARCH" = "arm" ]; then
+        exec qemu-system-arm -M vexpress-a9 \
+        -nographic \
+        -m 1024 \
+        -kernel ${CURRENT_DIR}/u-boot/u-boot \
+        -sd ${CURRENT_DIR}/devices/sd.img 
+        #-netdev user,id=eth0 \
+        -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
+        -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
+        #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
+        #-device i2c-bus \
+        #-device i2c-host,bus=sysbus.0,addr=0x50 \
+        #-device i2c-eeprom,bus=i2c-bus.0,size=256 
+    fi
 }
 
 # 将所有参数存储到数组中 默认为all

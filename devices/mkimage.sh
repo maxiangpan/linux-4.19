@@ -1,0 +1,67 @@
+#!/bin/sh
+set -e
+
+CURRENT_DIR=$(pwd)
+# 定义退出信号处理函数
+cleanup() {
+    if mount | grep -q "$CURRENT_DIR/p1"; then
+        sudo umount p1
+    elif mount | grep -q "$CURRENT_DIR/p2"; then
+        sudo umount p1 p2
+    elif mount | grep -q "$CURRENT_DIR/rootfs"; then
+        sudo umount p1 p2 rootfs
+    fi
+    sudo losetup -d $loop_dev
+    sudo rm -rf p1 p2 rootfs
+    sudo rm uImage
+}
+# 捕捉退出信号
+trap cleanup EXIT
+
+kernel_path=./uImage
+# dtb_path=~/linux-4.19/kernel/arch/arm/boot/dts/te/te_vxpress.dtb
+# 必须要dtb引导内核加载，否则内核找不到设备树，无法启动
+# 如果设备树配置错误依然无法引导内核加载
+dtb_path=$CURRENT_DIR/../kernel/arch/arm/boot/dts/vexpress-v2*.dtb
+rootfs_path=${CURRENT_DIR}/../buildroot/output/images/rootfs.ext4
+
+sec_img=sd.img
+
+############### Create uImage
+cd ../u-boot/tools
+mkimage -n "virt_linux" -A arm64 -a 0x60008000 -e 0x60008000 \
+ -d ../../kernel/arch/arm64/boot/Image ../../devices/uImage
+
+cd $CURRENT_DIR
+############### Create img
+# 这种只能arm架构不能使用arm64架构，还得继续看 https://blog.51cto.com/u_15127650/3467228
+loop_dev=$(losetup -f)
+
+dd if=/dev/zero of=$sec_img bs=1024 count=524288
+
+#创建GPT分区，下面创建了两个分区，一个用来存放kernel和设备树，另一个存放根文件系统
+sgdisk -n 0:0:+10M -c 0:kernel $sec_img
+sgdisk -n 0:0:0 -c 0:rootfs $sec_img
+
+sudo losetup $loop_dev $sec_img
+sudo partprobe $loop_dev
+
+#格式化
+sudo mkfs.ext4 ${loop_dev}p1
+sudo mkfs.ext4 ${loop_dev}p2
+
+sudo mkdir p1 p2 rootfs
+
+sudo mount -t ext4 ${loop_dev}p1 p1/
+sudo mount -t ext4 ${loop_dev}p2 p2/
+sudo mount $rootfs_path rootfs
+
+sudo cp $CURRENT_DIR/../kernel/arch/arm/boot/zImage p1/
+sudo cp $dtb_path p1/
+sudo cp -raf rootfs/* ./p2
+
+# sudo umount p1 p2 rootfs
+# sudo losetup -d $loop_dev
+# sudo rm -rf p1 p2 rootfs
+# sudo rm uImage
+echo "create success!"
