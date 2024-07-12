@@ -111,6 +111,26 @@ function build_buildroot(){
     finish_build
 }
 
+function build_img(){
+    echo "==========Start building img=========="
+    echo "========================================="
+
+    cd $CURRENT_DIR/devices
+    ./mkimage.sh
+}
+
+function clean_all(){
+    echo "clean all ..."
+    cd $CURRENT_DIR/devices
+    rm -rf cd cd $CURRENT_DIR/devices/sd.img
+    
+    cd $CURRENT_DIR/kernel
+    make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE clean
+
+    cd $CURRENT_DIR/u-boot
+    make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE clean
+}
+
 function build_all(){
     echo "============================================"
 	echo "TARGET_ARCH=$TE_ARCH"
@@ -130,6 +150,7 @@ function build_all(){
     build_buildroot
     build_uboot    
     build_kernel
+    build_img
 
     finish_build
 }
@@ -196,9 +217,11 @@ for option in "${OPTIONS[@]}"; do
     # 在这里可以对每个参数执行你想要的命令或操作
     case $option in
         all) build_all ;;
+        cleanall) clean_all ;;
         kernel) build_kernel ;;
         buildroot) build_buildroot ;;
         uboot) build_uboot ;;
+        mkimg) build_img ;;
         start)  start_qemu ;;
         *)      echo "Unknown option: $option" ;;
     esac

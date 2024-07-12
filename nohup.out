@@ -1,0 +1,83 @@
+processing option: all
+============================================
+TARGET_ARCH=arm
+CROSS_COMPILE=arm-linux-gnueabihf-
+TARGET_UBOOT_CONFIG=te_defconfig
+TARGET_KERNEL_CONFIG=te_defconfig
+TARGET_BUILDROOT_CONFIG=te_defconfig
+============================================
+==========Start building buildroot==========
+TARGET_BUILDROOT_CONFIG=te_defconfig
+=========================================
+#
+# configuration written to /home/firefly/linux-4.19/buildroot/.config
+#
+/usr/bin/make -j1  O=/home/firefly/linux-4.19/buildroot/output HOSTCC="/usr/bin/gcc" HOSTCXX="/usr/bin/g++" syncconfig
+make[2]: warning: -jN forced in submake: disabling jobserver mode.
+[7m>>> host-ccache 4.8.2 Configuring[27m
+(mkdir -p /home/firefly/linux-4.19/buildroot/output/build/host-ccache-4.8.2/ && cd /home/firefly/linux-4.19/buildroot/output/build/host-ccache-4.8.2/ && rm -f CMakeCache.txt && PATH="/home/firefly/linux-4.19/buildroot/output/host/bin:/home/firefly/linux-4.19/buildroot/output/host/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin" PKG_CONFIG="/home/firefly/linux-4.19/buildroot/output/host/bin/pkg-config" PKG_CONFIG_SYSROOT_DIR="/" PKG_CONFIG_LIBDIR="/home/firefly/linux-4.19/buildroot/output/host/lib/pkgconfig:/home/firefly/linux-4.19/buildroot/output/host/share/pkgconfig" PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 PKG_CONFIG_ALLOW_SYSTEM_LIBS=1  /home/firefly/linux-4.19/buildroot/output/host/bin/cmake /home/firefly/linux-4.19/buildroot/output/build/host-ccache-4.8.2/ -G"Unix Makefiles" -DCMAKE_MAKE_PROGRAM="/usr/bin/make" -DCMAKE_INSTALL_SO_NO_EXE=0 -DCMAKE_FIND_ROOT_PATH="/home/firefly/linux-4.19/buildroot/output/host" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM="BOTH" -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY="BOTH" -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE="BOTH" -DCMAKE_INSTALL_PREFIX="/home/firefly/linux-4.19/buildroot/output/host" -DCMAKE_C_FLAGS="-O2 -I/home/firefly/linux-4.19/buildroot/output/host/include" -DCMAKE_CXX_FLAGS="-O2 -I/home/firefly/linux-4.19/buildroot/output/host/include" -DCMAKE_EXE_LINKER_FLAGS="-L/home/firefly/linux-4.19/buildroot/output/host/lib -Wl,-rpath,/home/firefly/linux-4.19/buildroot/output/host/lib" -DCMAKE_SHARED_LINKER_FLAGS="-L/home/firefly/linux-4.19/buildroot/output/host/lib -Wl,-rpath,/home/firefly/linux-4.19/buildroot/output/host/lib" -DCMAKE_ASM_COMPILER="/usr/bin/as" -DCMAKE_C_COMPILER="/usr/bin/gcc" -DCMAKE_CXX_COMPILER="/usr/bin/g++"  -DCMAKE_C_COMPILER_LAUNCHER="/home/firefly/linux-4.19/buildroot/output/host/bin/ccache" -DCMAKE_CXX_COMPILER_LAUNCHER="/home/firefly/linux-4.19/buildroot/output/host/bin/ccache"  -DCMAKE_COLOR_MAKEFILE=OFF -DBUILD_DOC=OFF -DBUILD_DOCS=OFF -DBUILD_EXAMPLE=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TEST=OFF -DBUILD_TESTS=OFF -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON  -UCMAKE_C_COMPILER_LAUNCHER -UCMAKE_CXX_COMPILER_LAUNCHER -DZSTD_FROM_INTERNET=OFF -DHIREDIS_FROM_INTERNET=OFF -DENABLE_TESTING=OFF )
+-- The C compiler identification is GNU 7.5.0
+-- The CXX compiler identification is GNU 7.5.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /usr/bin/as
+-- The ASM_MASM compiler identification is unknown
+-- Found assembler: ml
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Ccache version: 4.8.2
+-- Ccache dev mode: OFF
+-- Setting CMAKE_BUILD_TYPE to Release as none was specified.
+-- Performing Test std_atomic_without_libatomic
+-- Performing Test std_atomic_without_libatomic - Success
+-- Performing Test std_filesystem_without_libfs
+-- Performing Test std_filesystem_without_libfs - Failed
+-- Performing Test std_filesystem_with_libfs
+-- Performing Test std_filesystem_with_libfs - Failed
+CMake Error at cmake/StdFilesystem.cmake:22 (message):
+  Toolchain doesn't support std::filesystem with nor without -lstdc++fs
+Call Stack (most recent call first):
+  cmake/StandardSettings.cmake:61 (include)
+  CMakeLists.txt:72 (include)
+
+
+-- Configuring incomplete, errors occurred!
+package/pkg-generic.mk:263: recipe for target '/home/firefly/linux-4.19/buildroot/output/build/host-ccache-4.8.2/.stamp_configured' failed
+make[1]: *** [/home/firefly/linux-4.19/buildroot/output/build/host-ccache-4.8.2/.stamp_configured] Error 1
+Makefile:82: recipe for target '_all' failed
+make: *** [_all] Error 2
+Command exited with non-zero status 2
+you take 0:31.99 to build
+processing option: all
+============================================
+TARGET_ARCH=arm
+CROSS_COMPILE=arm-linux-gnueabihf-
+TARGET_UBOOT_CONFIG=te_defconfig
+TARGET_KERNEL_CONFIG=te_defconfig
+TARGET_BUILDROOT_CONFIG=te_defconfig
+============================================
+==========Start building buildroot==========
+TARGET_BUILDROOT_CONFIG=te_defconfig
+=========================================
+#
+# configuration written to /home/firefly/linux-4.19/buildroot/.config
+#
+/usr/bin/make -j1  O=/home/firefly/linux-4.19/buildroot/output HOSTCC="/usr/bin/gcc" HOSTCXX="/usr/bin/g++" syncconfig
+make[2]: warning: -jN forced in submake: disabling jobserver mode.
+[7m>>> toolchain-external-custom  Extracting[27m
+[7m>>> toolchain-external-custom  Patching[27m
+[7m>>> toolchain-external-custom  Configuring[27m
+Cannot execute cross-compiler '/usr/bin/arm-linux-gnueabihf-/bin/aarch64-linux-gcc'
+package/pkg-generic.mk:263: recipe for target '/home/firefly/linux-4.19/buildroot/output/build/toolchain-external-custom/.stamp_configured' failed
+make[1]: *** [/home/firefly/linux-4.19/buildroot/output/build/toolchain-external-custom/.stamp_configured] Error 1
+Makefile:82: recipe for target '_all' failed
+make: *** [_all] Error 2
+Command exited with non-zero status 2
+you take 0:34.37 to build
