@@ -6,10 +6,12 @@ CURRENT_DIR=$(pwd)
 cleanup() {
     if mount | grep -q "$CURRENT_DIR/p1"; then
         sudo umount p1
-    elif mount | grep -q "$CURRENT_DIR/p2"; then
-        sudo umount p1 p2
-    elif mount | grep -q "$CURRENT_DIR/rootfs"; then
-        sudo umount p1 p2 rootfs
+    fi
+    if mount | grep -q "$CURRENT_DIR/p2"; then
+        sudo umount p2
+    fi
+    if mount | grep -q "$CURRENT_DIR/rootfs"; then
+        sudo umount rootfs
     fi
     sudo losetup -d $loop_dev
     sudo rm -rf p1 p2 rootfs
