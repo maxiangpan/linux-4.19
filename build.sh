@@ -57,7 +57,7 @@ function build_kernel(){
     echo "CROSS_COMPILE =$TE_CROSS_COMPILE"
     echo "TARGET_KERNEL_CONFIG =$KERNEL_DEFCONFIG"
 	echo "TARGET_KERNEL_DTS    =$KERNEL_DTS"
-    echo "========================================="
+    echo "=============================================="
 
     cd kernel
     
@@ -76,7 +76,7 @@ function build_kernel(){
 }
 
 function build_uboot(){ 
-    echo "==========Start building uboot=========="
+    echo "==========Start building uboot==========="
     echo "TARGET_UBOOT_CONFIG=$UBOOT_DEFCONFIG"
     echo "========================================="
 
@@ -101,7 +101,7 @@ function build_uboot(){
 function build_buildroot(){ 
     echo "==========Start building buildroot=========="
     echo "TARGET_BUILDROOT_CONFIG=$BUILDROOT_DEFCONFIG"
-    echo "========================================="
+    echo "============================================"
 
     cd buildroot
     
@@ -112,7 +112,7 @@ function build_buildroot(){
 }
 
 function build_img(){
-    echo "==========Start building img=========="
+    echo "==========Start building img============="
     echo "========================================="
 
     cd $CURRENT_DIR/devices
@@ -132,7 +132,7 @@ function clean_all(){
 }
 
 function build_all(){
-    echo "============================================"
+    echo "========================================="
 	echo "TARGET_ARCH=$TE_ARCH"
     echo "CROSS_COMPILE=$TE_CROSS_COMPILE"
 	#echo "TARGET_PLATFORM=$RK_TARGET_PRODUCT"
@@ -145,7 +145,7 @@ function build_all(){
 	#echo "TARGET_RECOVERY_CONFIG=$RK_CFG_RECOVERY"
 	#echo "TARGET_PCBA_CONFIG=$RK_CFG_PCBA"
 	#echo "TARGET_RAMBOOT_CONFIG=$RK_CFG_RAMBOOT"
-	echo "============================================"
+	echo "========================================="
 
     build_buildroot
     build_uboot    
@@ -221,10 +221,9 @@ for option in "${OPTIONS[@]}"; do
         cleanall) clean_all ;;
         kernel) build_kernel ;;
         buildroot) build_buildroot ;;
-        uboot) build_uboot ;;
+        "uboot"|"u-boot") build_uboot ;;
         mkimg) build_img ;;
         start)  start_qemu ;;
         *)      echo "Unknown option: $option" ;;
     esac
 done
-

@@ -169,11 +169,17 @@
         func(DHCP, dhcp, na)
 #include <config_distro_bootcmd.h>
 
+//setenv bootargs "root=/dev/mmcblk0p2 rw console=ttyAMA0"
+#define CONFIG_BOOTCOMMAND \
+	"load mmc 0:1 0x60008000 zImage; load mmc 0:1 0x61000000 vexpress-v2p-ca9.dtb; \
+	setenv bootargs 'root=/dev/mmcblk0p2 rw console=ttyAMA0'; \
+	bootz 0x60008000 - 0x61000000; "
+
 #ifdef CONFIG_VEXPRESS_ORIGINAL_MEMORY_MAP
 #define CONFIG_PLATFORM_ENV_SETTINGS \
 		"loadaddr=0x80008000\0" \
 		"ramdisk_addr_r=0x61000000\0" \
-		"kernel_addr=0x44100000\0" \
+		"kernel_addr=0x60008000\0" \
 		"ramdisk_addr=0x44800000\0" \
 		"maxramdisk=0x1800000\0" \
 		"pxefile_addr_r=0x88000000\0" \
