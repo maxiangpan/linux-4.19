@@ -30,7 +30,7 @@ sec_img=sd.img
 ############### Create uImage
 cd ../u-boot/tools
 mkimage -n "virt_linux" -A arm64 -a 0x60008000 -e 0x60008000 \
- -d ../../kernel/arch/arm64/boot/Image ../../devices/uImage
+ -d ../../kernel/arch/arm/boot/Image ../../devices/uImage
 
 cd $CURRENT_DIR
 ############### Create img
@@ -56,8 +56,8 @@ sudo mount -t ext4 ${loop_dev}p1 p1/
 sudo mount -t ext4 ${loop_dev}p2 p2/
 sudo mount $rootfs_path rootfs
 
-sudo cp $CURRENT_DIR/../kernel/arch/arm/boot/zImage p1/
-sudo cp $dtb_path p1/
+sudo cp -a $CURRENT_DIR/../kernel/arch/arm/boot/zImage p1/
+sudo cp -a $dtb_path p1/
 sudo cp -raf rootfs/* ./p2
 
 # sudo umount p1 p2 rootfs

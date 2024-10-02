@@ -162,6 +162,7 @@ function start_qemu(){
     #https://blog.csdn.net/duapple/article/details/128509624
     #共享文件 https://blog.csdn.net/sinat_38201303/article/details/108062939
     #uboot引导内核启动 https://zhuanlan.zhihu.com/p/676252968
+    #https://blog.csdn.net/weixin_40837318/article/details/134180125
     #-append "console=ttyAMA0 kmemleak=on loglevel=8" \
     #-dtb  ${CURRENT_DIR}/kernel/arch/arm/boot/dts/vexpress-v2p-ca9.dtb \
     #-kernel ${CURRENT_DIR}/u-boot/u-boot \
