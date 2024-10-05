@@ -36,6 +36,7 @@ function config(){
         TE_CROSS_COMPILE=aarch64-linux-gnu- #qemu arm64 编译环境
     else
         TE_CROSS_COMPILE=arm-linux-gnueabihf- #arm编译环境
+        #如果内核使用EABI接口那么buildroot也应当使用EABI
     fi
     #TE_CROSS_COMPILE=${CURRENT_DIR}/buildroot/output/host/bin/aarch64-buildroot-linux-gnu-
 }
@@ -109,6 +110,7 @@ function build_buildroot(){
     /usr/bin/time -f "you take %E to build" make -j$TE_JOBS
 
     finish_build
+    build_img
 }
 
 function build_img(){
@@ -198,10 +200,10 @@ function start_qemu(){
         -nographic \
         -m 1024 \
         -kernel ${CURRENT_DIR}/u-boot/u-boot \
-        -sd ${CURRENT_DIR}/devices/sd.img 
-        #-netdev user,id=eth0 \
+        -sd ${CURRENT_DIR}/devices/sd.img  
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
         -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
+        #-netdev user,id=eth0 \
         #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
         #-device i2c-bus \
         #-device i2c-host,bus=sysbus.0,addr=0x50 \
@@ -221,7 +223,7 @@ for option in "${OPTIONS[@]}"; do
         cleanall) clean_all ;;
         kernel) build_kernel ;;
         buildroot) build_buildroot ;;
-        "uboot"|"u-boot") build_uboot ;;
+        uboot) build_uboot ;;
         mkimg) build_img ;;
         start)  start_qemu ;;
         *)      echo "Unknown option: $option" ;;

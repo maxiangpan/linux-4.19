@@ -31,7 +31,7 @@ sec_img=sd.img
 
 ############### Create uImage
 cd ../u-boot/tools
-mkimage -n "virt_linux" -A arm64 -a 0x60008000 -e 0x60008000 \
+mkimage -n "virt_linux" -A arm -a 0x60008000 -e 0x60008000 \
  -d ../../kernel/arch/arm/boot/Image ../../devices/uImage
 
 cd $CURRENT_DIR
