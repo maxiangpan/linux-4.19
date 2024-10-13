@@ -16,7 +16,6 @@ function qemu_env(){
     repo git-core gitk git-gui gcc-arm-linux-gnueabihf \
     u-boot-tools device-tree-compiler \
     mtools parted \
-    gcc-aarch64-linux-gnu \
     bison flex libncurses-dev \
     libudev-dev libusb-1.0-0-dev \
     gcc-arm-linux-gnueabihf \
@@ -31,15 +30,22 @@ function qemu_env(){
     openssl tcl8.6-dev tk8.6-dev libreadline-dev zlib1g-dev \
     libparse-yapp-perl default-jre patchutils swig chrpath diffstat gawk time expect-dev -y
 
+    sudo apt-get install gcc-arm-linux-gnueabi #编译arm工具链
+    sudo apt-get install gcc-aarch64-linux-gnu #编译arm64工具链 
     pip install Sphinx
     sudo apt-get install python3-sphinx
     sudo apt-get install ninja-build
     pip3 install sphinx_rtd_theme==1.1.1
 
     cd qemu
+    git clone https://gitlab.freedesktop.org/slirp/libslirp.git
+    cd libslirp
+    sudo apt install meson
+    meson build  
+    ninja -C build install
     #不可使用sudo 如果是这样会引起一部分的报错
     ./configure
-    cd build && make && make install
+    make && sudo make install
 }
 
 text='

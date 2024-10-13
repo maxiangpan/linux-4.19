@@ -19,12 +19,18 @@ cleanup() {
 }
 # 捕捉退出信号
 trap cleanup EXIT
+te_arch=$1
 
 kernel_path=./uImage
 # dtb_path=~/linux-4.19/kernel/arch/arm/boot/dts/te/te_vxpress.dtb
 # 必须要dtb引导内核加载，否则内核找不到设备树，无法启动
 # 如果设备树配置错误依然无法引导内核加载
-dtb_path=$CURRENT_DIR/../kernel/arch/arm/boot/dts/vexpress-v2*.dtb
+if [ "$te_arch" = "arm" ]; then
+    dtb_path=$CURRENT_DIR/../kernel/arch/$te_arch/boot/dts/vexpress-v2*.dtb
+fi
+if [ "$te_arch" = "arm64" ]; then
+    dtb_path=$CURRENT_DIR/../kernel/arch/$te_arch/boot/dts/vexpress-v2*.dtb
+fi
 rootfs_path=${CURRENT_DIR}/../buildroot/output/images/rootfs.ext4
 
 sec_img=sd.img
@@ -32,7 +38,7 @@ sec_img=sd.img
 ############### Create uImage
 cd ../u-boot/tools
 mkimage -n "virt_linux" -A arm -a 0x60008000 -e 0x60008000 \
- -d ../../kernel/arch/arm/boot/Image ../../devices/uImage
+ -d ../../kernel/arch/$te_arch/boot/Image ../../devices/uImage
 
 cd $CURRENT_DIR
 ############### Create img
@@ -42,25 +48,35 @@ loop_dev=$(losetup -f)
 dd if=/dev/zero of=$sec_img bs=1024 count=524288
 
 #创建GPT分区，下面创建了两个分区，一个用来存放kernel和设备树，另一个存放根文件系统
-sgdisk -n 0:0:+10M -c 0:kernel $sec_img
-sgdisk -n 0:0:0 -c 0:rootfs $sec_img
+#sgdisk -n 0:0:+20M -c 0:kernel $sec_img
+#sgdisk -n 0:0:0 -c 0:rootfs $sec_img
+sgdisk -n 1:2048:43007 -c 1:"kernel" $sec_img   # kernel 分区
+sgdisk -n 2:43008:0 -c 2:"rootfs" $sec_img   # rootfs 分区
 
 sudo losetup $loop_dev $sec_img
 sudo partprobe $loop_dev
 
 #格式化
-sudo mkfs.ext4 ${loop_dev}p1
-sudo mkfs.ext4 ${loop_dev}p2
+#sudo mkfs.ext4 ${loop_dev}p1
+#sudo mkfs.ext4 ${loop_dev}p2
+sudo mkfs.ext4 -b 4096 -L kernel ${loop_dev}p1
+sudo mkfs.ext4 -b 4096 -L rootfs ${loop_dev}p2
 
 sudo mkdir p1 p2 rootfs
 
 sudo mount -t ext4 ${loop_dev}p1 p1/
 sudo mount -t ext4 ${loop_dev}p2 p2/
-sudo mount $rootfs_path rootfs
+sudo mount -t ext4 $rootfs_path rootfs/
 
-sudo cp -a $CURRENT_DIR/../kernel/arch/arm/boot/zImage p1/
+if [ "$te_arch" = "arm64" ]; then
+    sudo cp -a $CURRENT_DIR/../kernel/arch/$te_arch/boot/Image p1/
+fi
+if [ "$te_arch" = "arm" ]; then
+    sudo cp -a $CURRENT_DIR/../kernel/arch/$te_arch/boot/zImage p1/
+fi
 sudo cp -a $dtb_path p1/
 sudo cp -raf rootfs/* ./p2
+#sudo cp -a $CURRENT_DIR/../rootfs/lib/* ./p2/lib
 
 # sudo umount p1 p2 rootfs
 # sudo losetup -d $loop_dev

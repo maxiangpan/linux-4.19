@@ -26,16 +26,25 @@ function finish_build(){
 }
 
 function config(){
-    KERNEL_DEFCONFIG=te_defconfig
-    BUILDROOT_DEFCONFIG=te_defconfig
-    UBOOT_DEFCONFIG=te_defconfig
+
     KERNEL_DTS=te_vxpress
+    #获取vexpress默认config
+    #make CROSS_COMPILE=$cross_compile ARCH=arm vexpress_defconfig
 
     TE_ARCH=arm
     if [ "$TE_ARCH" = "arm64" ]; then
         TE_CROSS_COMPILE=aarch64-linux-gnu- #qemu arm64 编译环境
+        KERNEL_DEFCONFIG=te64_defconfig
+        BUILDROOT_DEFCONFIG=te64_defconfig
+        UBOOT_DEFCONFIG=te64_defconfig
     else
-        TE_CROSS_COMPILE=arm-linux-gnueabihf- #arm编译环境
+        #TE_CROSS_COMPILE=arm-linux-gnueabihf-
+        TE_CROSS_COMPILE=arm-linux-gnueabi-
+        #TE_CROSS_COMPILE=${CURRENT_DIR}/buildroot/output/host/bin/arm-buildroot-linux-gnueabi-
+        KERNEL_DEFCONFIG=te_defconfig
+        BUILDROOT_DEFCONFIG=te_defconfig
+        UBOOT_DEFCONFIG=te_defconfig
+        #arm编译环境
         #如果内核使用EABI接口那么buildroot也应当使用EABI
     fi
     #TE_CROSS_COMPILE=${CURRENT_DIR}/buildroot/output/host/bin/aarch64-buildroot-linux-gnu-
@@ -70,7 +79,7 @@ function build_kernel(){
     if [ "$TE_ARCH" = "arm64" ]; then
         make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE LOADADDR=0x60008000 -j$TE_JOBS
     else
-        make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE LOADADDR=0x60008000 bzImage -j$TE_JOBS
+        make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE LOADADDR=0x60008000 zImage -j$TE_JOBS
     fi
 
     finish_build
@@ -81,7 +90,7 @@ function build_uboot(){
     echo "TARGET_UBOOT_CONFIG=$UBOOT_DEFCONFIG"
     echo "========================================="
 
-    cd u-boot
+    cd $CURRENT_DIR/u-boot
     rm -f *_loader_*.bin
 
     if [ -f "configs/${UBOOT_DEFCONFIG}" ]; then
@@ -92,8 +101,8 @@ function build_uboot(){
     echo "ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE"
     if [ -n "$TE_CROSS_COMPILE" ];then
         #qemu可以使用arm-linux-gnueabihf- 不知道何时使用arm64
-        #make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE all
-        make CROSS_COMPILE=arm-linux-gnueabihf- all
+        make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE all
+        #make CROSS_COMPILE=arm-linux-gnueabihf- all
     fi
 
     finish_build
@@ -102,15 +111,18 @@ function build_uboot(){
 function build_buildroot(){ 
     echo "==========Start building buildroot=========="
     echo "TARGET_BUILDROOT_CONFIG=$BUILDROOT_DEFCONFIG"
+    echo "CROSS_COMPILE =$TE_CROSS_COMPILE"
     echo "============================================"
+    #配置busybox
+    #sudo make busybox-menuconfig
+    #make busybox-update-config
 
     cd buildroot
     
     make $BUILDROOT_DEFCONFIG
-    /usr/bin/time -f "you take %E to build" make -j$TE_JOBS
+    /usr/bin/time -f "you take %E to build" make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
 
     finish_build
-    build_img
 }
 
 function build_img(){
@@ -118,7 +130,7 @@ function build_img(){
     echo "========================================="
 
     cd $CURRENT_DIR/devices
-    ./mkimage.sh
+    ./mkimage.sh $TE_ARCH
 }
 
 function clean_all(){
@@ -179,13 +191,14 @@ function start_qemu(){
         -machine type=virt \
         -nographic \
         -smp 2 -m 2048 \
-        -kernel ${CURRENT_DIR}/u-boot/u-boot \
-        -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
         -sd ${CURRENT_DIR}/devices/sd.img \
-        -netdev user,id=eth0 \
-        -device virtio-net-device,netdev=eth0 \
-        -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
+        -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
         -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
+        -device virtio-net-device,netdev=eth0 \
+        -bios ${CURRENT_DIR}/u-boot/u-boot.bin \
+        -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
+        #-kernel ${CURRENT_DIR}/u-boot/u-boot \
+        #-netdev user,id=eth0 \
         #-kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
         #-kernel ${CURRENT_DIR}/u-boot/u-boot \
         #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
@@ -197,17 +210,19 @@ function start_qemu(){
     # arm编译环境
     if [ "$TE_ARCH" = "arm" ]; then
         exec qemu-system-arm -M vexpress-a9 \
+        -smp 2 -m 1024 \
         -nographic \
-        -m 1024 \
         -kernel ${CURRENT_DIR}/u-boot/u-boot \
-        -sd ${CURRENT_DIR}/devices/sd.img  
+        -sd ${CURRENT_DIR}/devices/sd.img  \
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
         -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
+        -append "console=ttyAMA0,115200 root=/dev/mmcblk0p2 rw rootwait" \
         #-netdev user,id=eth0 \
         #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
         #-device i2c-bus \
         #-device i2c-host,bus=sysbus.0,addr=0x50 \
         #-device i2c-eeprom,bus=i2c-bus.0,size=256 
+        #-kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
     fi
 }
 
