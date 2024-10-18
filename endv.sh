@@ -33,10 +33,10 @@ function qemu_env(){
     libparse-yapp-perl default-jre patchutils swig chrpath diffstat gawk time expect-dev wget -y
 
     if [ ! -f tools ]; then
-        mkdir $CURRENT_DIR/tools
-        wget https://publishing-ie-linaro-org.s3.amazonaws.com/releases/components/toolchain/binaries/latest-7/arm-linux-gnueabi/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz?Signature=557ZQ%2FXVZR%2FQef6Ql3qu2D8XX5M%3D&Expires=1729185674&AWSAccessKeyId=AKIAIELXV2RYNAHFUP7A
+        mkdir $CURRENT_DIR/tools && cd $CURRENT_DIR/tools
+        wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabi/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
         tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
-        mv gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz arm
+        mv gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi arm
     fi
 
     cd $CURRENT_DIR
@@ -47,15 +47,15 @@ function qemu_env(){
     sudo apt-get install ninja-build
     pip3 install sphinx_rtd_theme==1.1.1
 
-    cd $CURRENT_DIR/qemu
-    git clone https://gitlab.freedesktop.org/slirp/libslirp.git
-    cd libslirp
-    sudo apt install meson
-    meson build  
-    ninja -C build install
-    #不可使用sudo 如果是这样会引起一部分的报错
-    ./configure
-    make && sudo make install
+    # cd $CURRENT_DIR/qemu
+    # git clone https://gitlab.freedesktop.org/slirp/libslirp.git
+    # cd libslirp
+    # sudo apt install meson
+    # meson build  
+    # ninja -C build install
+    # #不可使用sudo 如果是这样会引起一部分的报错
+    # ./configure
+    # make && sudo make install
 }
 
 text='
