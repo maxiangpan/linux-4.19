@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CURRENT_DIR=$(pwd)
+
 function default(){
     echo "***********************"
     echo "*1.qemu_env           *"
@@ -28,8 +30,16 @@ function qemu_env(){
     subversion asciidoc w3m dblatex graphviz  libssl-dev texinfo fakeroot \
     libbz2-dev libncurses5-dev libgdbm-dev liblzma-dev sqlite3 libsqlite3-dev \
     openssl tcl8.6-dev tk8.6-dev libreadline-dev zlib1g-dev \
-    libparse-yapp-perl default-jre patchutils swig chrpath diffstat gawk time expect-dev -y
+    libparse-yapp-perl default-jre patchutils swig chrpath diffstat gawk time expect-dev wget -y
 
+    if [ ! -f tools ]; then
+        mkdir $CURRENT_DIR/tools
+        wget https://publishing-ie-linaro-org.s3.amazonaws.com/releases/components/toolchain/binaries/latest-7/arm-linux-gnueabi/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz?Signature=557ZQ%2FXVZR%2FQef6Ql3qu2D8XX5M%3D&Expires=1729185674&AWSAccessKeyId=AKIAIELXV2RYNAHFUP7A
+        tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
+        mv gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz arm
+    fi
+
+    cd $CURRENT_DIR
     sudo apt-get install gcc-arm-linux-gnueabi #编译arm工具链
     sudo apt-get install gcc-aarch64-linux-gnu #编译arm64工具链 
     pip install Sphinx
@@ -37,7 +47,7 @@ function qemu_env(){
     sudo apt-get install ninja-build
     pip3 install sphinx_rtd_theme==1.1.1
 
-    cd qemu
+    cd $CURRENT_DIR/qemu
     git clone https://gitlab.freedesktop.org/slirp/libslirp.git
     cd libslirp
     sudo apt install meson

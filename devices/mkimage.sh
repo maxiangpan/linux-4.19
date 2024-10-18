@@ -122,9 +122,9 @@ else
     echo "rootfs does not exist or is empty."
 fi
 
-cd p2/dev
-sudo mknod console c 5 1
-sudo mknod ttyAMA0 c 204 64
+# cd p2/dev
+# sudo mknod console c 5 1
+# sudo mknod ttyAMA0 c 204 64
 
 #sudo cp -a $CURRENT_DIR/../rootfs/lib/* ./p2/lib
 
