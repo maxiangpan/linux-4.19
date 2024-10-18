@@ -38,9 +38,9 @@ function config(){
         BUILDROOT_DEFCONFIG=te64_defconfig
         UBOOT_DEFCONFIG=te64_defconfig
     else
-        #TE_CROSS_COMPILE=arm-linux-gnueabihf-
-        TE_CROSS_COMPILE=arm-linux-gnueabi-
+        #TE_CROSS_COMPILE=arm-linux-gnueabi-
         #TE_CROSS_COMPILE=${CURRENT_DIR}/buildroot/output/host/bin/arm-buildroot-linux-gnueabi-
+        TE_CROSS_COMPILE=$CURRENT_DIR/tools/arm/bin/arm-linux-gnueabi-
         KERNEL_DEFCONFIG=te_defconfig
         BUILDROOT_DEFCONFIG=te_defconfig
         UBOOT_DEFCONFIG=te_defconfig
