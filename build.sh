@@ -122,6 +122,8 @@ function build_buildroot(){
     make $BUILDROOT_DEFCONFIG
     /usr/bin/time -f "you take %E to build" make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
 
+    build_img
+
     finish_build
 }
 
@@ -161,10 +163,9 @@ function build_all(){
 	#echo "TARGET_RAMBOOT_CONFIG=$RK_CFG_RAMBOOT"
 	echo "========================================="
 
-    build_buildroot
     build_uboot    
     build_kernel
-    build_img
+    build_buildroot
 
     finish_build
 }

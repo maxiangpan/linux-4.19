@@ -11,12 +11,12 @@ cleanup() {
         echo "Unmounted $mountpoint"
         sudo umount "$mountpoint"
     done
-
+    cd $CURRENT_DIR
     mount | grep "devices/p2" | awk '{print $3}' | while read -r mountpoint; do
         echo "Unmounted $mountpoint"
         sudo umount "$mountpoint"
     done
-    
+    cd $CURRENT_DIR
     mount | grep "rootfs" | awk '{print $3}' | while read -r mountpoint; do
         echo "Unmounted $mountpoint"
         sudo umount "$mountpoint"
@@ -122,9 +122,7 @@ else
     echo "rootfs does not exist or is empty."
 fi
 
-# cd p2/dev
-# sudo mknod console c 5 1
-# sudo mknod ttyAMA0 c 204 64
+source post-build.sh passwd p2
 
 #sudo cp -a $CURRENT_DIR/../rootfs/lib/* ./p2/lib
 
