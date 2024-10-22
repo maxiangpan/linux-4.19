@@ -8,6 +8,12 @@ menu "I2C Hardware Bus support"
 comment "PC SMBus host controller drivers"
 	depends on PCI
 
+config I2C_TEST
+	tristate "Test driver"
+	help
+	  This is a test driver for the I2C subsystem.  It can be used to
+	  test the I2C subsystem and the drivers that are attached to it.
+
 config I2C_ALI1535
 	tristate "ALI 1535"
 	depends on PCI

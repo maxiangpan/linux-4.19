@@ -3,6 +3,9 @@
 # Makefile for the i2c bus drivers.
 #
 
+#qemu I2C test
+obj-$(CONFIG_I2C_TEST)		+= i2c-dev-test.o
+
 # ACPI drivers
 obj-$(CONFIG_I2C_SCMI)		+= i2c-scmi.o
 

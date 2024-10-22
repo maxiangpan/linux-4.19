@@ -4,10 +4,10 @@
 #
 
 #
-# Compiler: arm-linux-gnueabi-gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+# Compiler: arm-linux-gnueabi-gcc (Linaro GCC 7.5-2019.12) 7.5.0
 #
 CONFIG_CC_IS_GCC=y
-CONFIG_GCC_VERSION=110400
+CONFIG_GCC_VERSION=70500
 CONFIG_CLANG_VERSION=0
 CONFIG_CC_HAS_ASM_GOTO=y
 CONFIG_IRQ_WORK=y
@@ -498,7 +498,8 @@ CONFIG_ARM_CRYPTO=y
 # CONFIG_CRYPTO_SHA512_ARM is not set
 # CONFIG_CRYPTO_AES_ARM is not set
 CONFIG_VIRTUALIZATION=y
-# CONFIG_VHOST_NET is not set
+CONFIG_VHOST_NET=y
+CONFIG_VHOST=y
 # CONFIG_VHOST_CROSS_ENDIAN_LEGACY is not set
 
 #
@@ -1420,6 +1421,7 @@ CONFIG_I2C_ALGOBIT=y
 #
 # I2C Hardware Bus support
 #
+CONFIG_I2C_TEST=y
 
 #
 # I2C system bus drivers (mostly embedded / system-on-chip)
@@ -1452,7 +1454,7 @@ CONFIG_I2C_VERSATILE=y
 # CONFIG_I2C_SLAVE is not set
 # CONFIG_I2C_DEBUG_CORE is not set
 # CONFIG_I2C_DEBUG_ALGO is not set
-# CONFIG_I2C_DEBUG_BUS is not set
+CONFIG_I2C_DEBUG_BUS=y
 # CONFIG_SPI is not set
 # CONFIG_SPMI is not set
 # CONFIG_HSI is not set

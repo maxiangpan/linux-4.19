@@ -10,6 +10,7 @@
 
 /dts-v1/;
 #include "vexpress-v2m.dtsi"
+#include "vexpress-v2p-ca9.dtsi"
 
 / {
 	model = "V2P-CA9";
@@ -29,6 +30,7 @@
 		serial3 = &v2m_serial3;
 		i2c0 = &v2m_i2c_dvi;
 		i2c1 = &v2m_i2c_pcie;
+		//i2c3 = &v2m_i2c_0;
 	};
 
 	cpus {

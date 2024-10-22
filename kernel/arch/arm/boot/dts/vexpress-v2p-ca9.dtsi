@@ -1,0 +1,18 @@
+/ {
+#if 0
+	pinctrl_i2c: i2cgrp {
+			fsl,pins = <
+				MX6UL_PAD_UART4_TX_DATA__I2C1_SCL 0x4001b8b0
+				MX6UL_PAD_UART4_RX_DATA__I2C1_SDA 0x4001b8b0
+			>;
+		};
+#endif
+	v2m_i2c {
+		label = "v2m:i2c:user1";
+		compatible = "arm,i2c-test";
+		reg = <0x16000 0x1000>;
+		gpios = <&v2m_i2c_pcie 0 0>;
+		status = "okay";
+	};
+
+};
