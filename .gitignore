@@ -7172,3 +7172,4 @@ devices/sd.img
 devices/uImage
 devices/p2
 devices/p1
+qemu/libslirp/

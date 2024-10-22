@@ -218,6 +218,7 @@ function start_qemu(){
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
         -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
         -append "console=ttyAMA0,115200 root=/dev/mmcblk0p2 rw rootwait" \
+        -device at24c-eeprom \
         #-netdev user,id=eth0 \
         #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
         #-device i2c-bus \

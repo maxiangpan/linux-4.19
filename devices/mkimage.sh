@@ -4,8 +4,7 @@ passwd='123'
 
 CURRENT_DIR=$(pwd)
 # 定义退出信号处理函数
-cleanup() {
-    # 搜索挂载的文件系统
+function clean(){ 
     cd $CURRENT_DIR
     mount | grep "devices/p1" | awk '{print $3}' | while read -r mountpoint; do
         echo "Unmounted $mountpoint"
@@ -26,30 +25,12 @@ cleanup() {
     for loop_device in $loop_devices; do
         sudo losetup -d $loop_device
     done
-
-    # if [ -d "$CURRENT_DIR/p1" ]; then
-    #     if mount | grep -q "$CURRENT_DIR/p1"; then
-    #         sudo umount p1
-    #         echo "umount p1"
-    #     fi
-    # fi
-    # if [ -d "$CURRENT_DIR/p2" ]; then
-    #     if mount | grep -q "$CURRENT_DIR/p2"; then
-    #         sudo umount p2
-    #         echo "umount p2"
-    #     fi
-    # fi
-    # if [ -d "$CURRENT_DIR/rootfs" ]; then
-    #     if mount | grep -q "$CURRENT_DIR/rootfs"; then
-    #         sudo umount rootfs
-    #         echo "umount rootfs"
-    #     fi
-    # fi
-    # if [ -n "$loop_dev" ]; then
-    #     sudo losetup -d $loop_dev
-    # fi
     sudo rm -rf p1 p2 rootfs
     sudo rm uImage
+}
+cleanup() {
+    # 搜索挂载的文件系统
+    clean
 }
 # 捕捉退出信号
 trap cleanup EXIT
@@ -130,4 +111,6 @@ source post-build.sh passwd p2
 # sudo losetup -d $loop_dev
 # sudo rm -rf p1 p2 rootfs
 # sudo rm uImage
+cd $CURRENT_DIR
+clean
 echo "create success!"
