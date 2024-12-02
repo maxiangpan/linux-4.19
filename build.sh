@@ -210,6 +210,7 @@ function start_qemu(){
 
     # arm编译环境
     if [ "$TE_ARCH" = "arm" ]; then
+        #使用telnet 127.0.0.1 4444 进入qemu monitor
         exec qemu-system-arm -M vexpress-a9 \
         -smp 2 -m 1024 \
         -nographic \
@@ -218,7 +219,13 @@ function start_qemu(){
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
         -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
         -append "console=ttyAMA0,115200 root=/dev/mmcblk0p2 rw rootwait" \
-        -device at24c-eeprom \
+        -device at24c-eeprom,id=i2c-bus,address=0x50,rom-size=1024 \
+        # -display sdl
+        #-monitor telnet:127.0.0.1:4444,server,nowait
+
+        #下面才是测试的
+        #-s -S
+        #-device at24c-eeprom,rom-size=1024,address=0x50 \
         #-netdev user,id=eth0 \
         #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
         #-device i2c-bus \

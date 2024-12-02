@@ -175,6 +175,7 @@
 	setenv bootargs 'root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait console=tty0 console=ttyAMA0 init=/linuxrc'; \
 	bootz 0x60008000 - 0x61000000; "
 #define CONFIG_BOOTARGS "root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait console=tty0 console=ttyAMA0 init=/linuxrc"
+#define CONFIG_BOOTDELAY 0.5
 
 #ifdef CONFIG_VEXPRESS_ORIGINAL_MEMORY_MAP
 #define CONFIG_PLATFORM_ENV_SETTINGS \
