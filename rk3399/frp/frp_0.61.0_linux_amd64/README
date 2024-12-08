@@ -1,0 +1,27 @@
+https://gofrp.org/zh-cn/docs/examples/ssh/
+https://blog.dollcode.cn/linux-newfrp
+
+
+vim /etc/systemd/system/frps.service
+[Unit]
+Description = frp server
+After = network.target syslog.target
+Wants = network.target
+
+[Service]
+Type = simple
+# 启动frps的命令，需修改为您的frps的安装路径
+ExecStart = /home/blog/frp_0.60.0_linux_amd64/frps -c /home/blog/frp_0.60.0_linux_amd64/frps.toml
+
+[Install]
+WantedBy = multi-user.target
+
+// 启动FRP服务并设置开机自启
+systemctl enable --now frps
+// 查看运行状态
+systemctl status frps
+
+
+ssh -o Port=9001 mxp@101.43.89.251
+
+
