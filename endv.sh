@@ -32,6 +32,13 @@ function qemu_env(){
     openssl tcl8.6-dev tk8.6-dev libreadline-dev zlib1g-dev \
     libparse-yapp-perl default-jre patchutils swig chrpath diffstat gawk time expect-dev wget -y
 
+    cd qemu
+    sudo apt -y install ninja-build build-essential zlib1g-dev pkg-config libglib2.0-dev binutils-dev libpixman-1-dev libfdt-dev
+    mkdir build && cd build
+    ../configure --enable-kvm --target-list=x86_64-softmmu --enable-debug
+    make -j$(nproc)
+    sudo make install
+
     if [ ! -f tools ]; then
         mkdir $CURRENT_DIR/tools && cd $CURRENT_DIR/tools
         wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabi/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
