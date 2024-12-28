@@ -32,6 +32,7 @@ function config(){
     #make CROSS_COMPILE=$cross_compile ARCH=arm vexpress_defconfig
 
     TE_ARCH=arm64
+    TE_ARCH=arm64
     if [ "$TE_ARCH" = "arm64" ]; then
         TE_CROSS_COMPILE=aarch64-linux-gnu- #qemu arm64 编译环境
         KERNEL_DEFCONFIG=te64_defconfig
@@ -127,7 +128,9 @@ function build_buildroot(){
 
     build_img
 
-    finish_build
+    if [ "$TE_ARCH" = "arm" ]; then
+        finish_build
+    fi
 }
 
 function build_img(){
@@ -197,6 +200,7 @@ function start_qemu(){
         -smp 2 -m 1024 \
         -cpu cortex-a53 \
         -machine type=virt \
+        -dtb ${CURRENT_DIR}/kernel/arch/arm64/boot/dts/te/qemu-virt.dtb \
         -kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
         -nographic \
         -smp 2 -m 2048 \
@@ -205,10 +209,7 @@ function start_qemu(){
         -device virtio-net-device,netdev=eth0 \
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@"
         #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
-        #-drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
-        #-kernel ${CURRENT_DIR}/u-boot/u-boot \
         #qemu virt没有SD卡设备
-        #exec qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -smp 1 -kernel Image -append "rootwait root=/dev/vda console=ttyAMA0" 
         #-netdev user,id=eth0 -device virtio-net-device,netdev=eth0 -drive file=rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@"
     fi
 
