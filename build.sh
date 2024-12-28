@@ -145,6 +145,9 @@ function clean_all(){
 
     cd $CURRENT_DIR/u-boot
     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE clean
+
+    cd $CURRENT_DIR/buildroot
+    make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE clean
 }
 
 function build_all(){
@@ -188,16 +191,18 @@ function start_qemu(){
     #-device virtio-9p-device,fsdev=kmod_dev,mount_tag=kmod_mount`
     #将本地文件系统设备挂载到虚拟机中，其中`fsdev`指定设备ID，`mount_tag`指定设备挂载的标签。
         exec qemu-system-aarch64 -M virt \
-        -cpu cortex-a57 \
+        -smp 2 -m 1024 \
+        -cpu cortex-a53 \
         -machine type=virt \
+        -kernel ${CURRENT_DIR}/u-boot/u-boot \
         -nographic \
         -smp 2 -m 2048 \
-        -sd ${CURRENT_DIR}/devices/sd.img \
         -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
         -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
-        -device virtio-net-device,netdev=eth0 \
         -bios ${CURRENT_DIR}/u-boot/u-boot.bin \
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
+        #-kernel ${CURRENT_DIR}/u-boot/u-boot \
+        #qemu virt没有SD卡设备
         #-kernel ${CURRENT_DIR}/u-boot/u-boot \
         #-netdev user,id=eth0 \
         #-kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
