@@ -31,7 +31,7 @@ function config(){
     #获取vexpress默认config
     #make CROSS_COMPILE=$cross_compile ARCH=arm vexpress_defconfig
 
-    TE_ARCH=arm
+    TE_ARCH=arm64
     if [ "$TE_ARCH" = "arm64" ]; then
         TE_CROSS_COMPILE=aarch64-linux-gnu- #qemu arm64 编译环境
         KERNEL_DEFCONFIG=te64_defconfig
@@ -99,10 +99,13 @@ function build_uboot(){
     fi
 
     echo "ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE"
-    if [ -n "$TE_CROSS_COMPILE" ];then
-        #qemu可以使用arm-linux-gnueabihf- 不知道何时使用arm64
-        make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE all
-        #make CROSS_COMPILE=arm-linux-gnueabihf- all
+
+    if [ "$TE_ARCH" = "arm" ]; then
+        if [ -n "$TE_CROSS_COMPILE" ];then
+            #qemu可以使用arm-linux-gnueabihf- 不知道何时使用arm64
+            make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE all
+            #make CROSS_COMPILE=arm-linux-gnueabihf- all
+        fi
     fi
 
     finish_build
@@ -194,23 +197,19 @@ function start_qemu(){
         -smp 2 -m 1024 \
         -cpu cortex-a53 \
         -machine type=virt \
-        -kernel ${CURRENT_DIR}/u-boot/u-boot \
+        -kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
         -nographic \
         -smp 2 -m 2048 \
         -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
-        -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
-        -bios ${CURRENT_DIR}/u-boot/u-boot.bin \
-        -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
+        -netdev user,id=eth0 \
+        -device virtio-net-device,netdev=eth0 \
+        -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@"
+        #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
+        #-drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 \
         #-kernel ${CURRENT_DIR}/u-boot/u-boot \
         #qemu virt没有SD卡设备
-        #-kernel ${CURRENT_DIR}/u-boot/u-boot \
-        #-netdev user,id=eth0 \
-        #-kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
-        #-kernel ${CURRENT_DIR}/u-boot/u-boot \
-        #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
-        #-device i2c-bus \
-        #-device i2c-host,bus=sysbus.0,addr=0x50 \
-        #-device i2c-eeprom,bus=i2c-bus.0,size=256 
+        #exec qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -smp 1 -kernel Image -append "rootwait root=/dev/vda console=ttyAMA0" 
+        #-netdev user,id=eth0 -device virtio-net-device,netdev=eth0 -drive file=rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@"
     fi
 
     # arm编译环境
