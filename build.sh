@@ -32,7 +32,6 @@ function config(){
     #make CROSS_COMPILE=$cross_compile ARCH=arm vexpress_defconfig
 
     TE_ARCH=arm64
-    TE_ARCH=arm64
     if [ "$TE_ARCH" = "arm64" ]; then
         TE_CROSS_COMPILE=aarch64-linux-gnu- #qemu arm64 编译环境
         KERNEL_DEFCONFIG=te64_defconfig
@@ -126,11 +125,11 @@ function build_buildroot(){
     make $BUILDROOT_DEFCONFIG
     /usr/bin/time -f "you take %E to build" make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
 
-    build_img
-
     if [ "$TE_ARCH" = "arm" ]; then
-        finish_build
+        build_img
     fi
+    
+    finish_build
 }
 
 function build_img(){
@@ -139,6 +138,22 @@ function build_img(){
 
     cd $CURRENT_DIR/devices
     ./mkimage.sh $TE_ARCH
+}
+
+function build_qemu(){
+    SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
+    cd qemu
+    if [ ! -d "$SHELL_FOLDER/qemu/output" ]; then
+        if [ "$TE_ARCH" = "arm64" ]; then
+            ./configure --prefix=$SHELL_FOLDER/qemu/output  --target-list=aarch64-softmmu --enable-gtk  --enable-virtfs --disable-gio
+        else
+            ./configure --prefix=$SHELL_FOLDER/qemu/output  --target-list=arm-softmmu --enable-gtk  --enable-virtfs --disable-gio
+        fi
+    fi  
+    make -j16
+    make install
+    cd ..
+
 }
 
 function clean_all(){
@@ -175,6 +190,7 @@ function build_all(){
     build_uboot    
     build_kernel
     build_buildroot
+    build_qemu
 
     finish_build
 }
@@ -196,27 +212,36 @@ function start_qemu(){
     
     #-device virtio-9p-device,fsdev=kmod_dev,mount_tag=kmod_mount`
     #将本地文件系统设备挂载到虚拟机中，其中`fsdev`指定设备ID，`mount_tag`指定设备挂载的标签。
-        exec qemu-system-aarch64 -M virt \
-        -smp 2 -m 1024 \
+    #./qemu/output/bin/qemu-system-aarch64 -device help | grep i2c
+    #https://quard-star-tutorial.readthedocs.io/zh-cn/latest/ch16.html
+        exec $CURRENT_DIR/qemu/output/bin/qemu-system-aarch64 -M virt \
+        -smp 2 -m 1G -nographic \
         -cpu cortex-a53 \
         -machine type=virt \
         -dtb ${CURRENT_DIR}/kernel/arch/arm64/boot/dts/te/qemu-virt.dtb \
         -kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
-        -nographic \
-        -smp 2 -m 2048 \
         -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
         -netdev user,id=eth0 \
         -device virtio-net-device,netdev=eth0 \
-        -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@"
+        -device virtio-gpu-device,id=video0,xres=1280,yres=720 \
+        -device at24c-eeprom,id=i2c0,address=0x50,rom-size=1024 \
+        -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
+        -D /tmp/qemu-debug-log \
+        -monitor pty 
+
+        #-monitor telnet:127.0.0.1:4444,server,nowait 查看qemu log
+        #
         #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
         #qemu virt没有SD卡设备
         #-netdev user,id=eth0 -device virtio-net-device,netdev=eth0 -drive file=rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@"
+        #-device virtio-gpu-device,id=video0,xres=1280,yres=720 \
+        #-device at24c-eeprom,bus=i2c0,address=0x50,rom-size=1024 \
     fi
 
     # arm编译环境
     if [ "$TE_ARCH" = "arm" ]; then
         #使用telnet 127.0.0.1 4444 进入qemu monitor
-        exec qemu-system-arm -M vexpress-a9 \
+        exec $CURRENT_DIR/qemu/output/bin/qemu-system-arm -M vexpress-a9 \
         -smp 2 -m 1024 \
         -nographic \
         -kernel ${CURRENT_DIR}/u-boot/u-boot \
@@ -225,6 +250,8 @@ function start_qemu(){
         -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
         -append "console=ttyAMA0,115200 root=/dev/mmcblk0p2 rw rootwait" \
         -device at24c-eeprom,id=i2c-bus,address=0x50,rom-size=1024 \
+        -netdev user,id=eth0 \
+        -device virtio-net-device,netdev=eth0 \
         # -display sdl
         #-monitor telnet:127.0.0.1:4444,server,nowait
 
@@ -254,6 +281,7 @@ for option in "${OPTIONS[@]}"; do
         buildroot) build_buildroot ;;
         uboot) build_uboot ;;
         mkimg) build_img ;;
+        qemu)  build_qemu ;;
         start)  start_qemu ;;
         *)      echo "Unknown option: $option" ;;
     esac

@@ -41,6 +41,7 @@
 #include "hw/vfio/vfio-calxeda-xgmac.h"
 #include "hw/vfio/vfio-amd-xgbe.h"
 #include "hw/display/ramfb.h"
+#include "hw/i2c/i2c.h"
 #include "net/net.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/numa.h"
@@ -84,6 +85,7 @@
 #include "hw/virtio/virtio-iommu.h"
 #include "hw/char/pl011.h"
 #include "qemu/guest-random.h"
+#include "hw/i2c/arm_sbcon_i2c.h"
 
 static GlobalProperty arm_virt_compat[] = {
     { TYPE_VIRTIO_IOMMU_PCI, "aw-bits", "48" },
@@ -185,6 +187,40 @@ static const MemMapEntry base_memmap[] = {
     [VIRT_PCIE_ECAM] =          { 0x3f000000, 0x01000000 },
     /* Actual RAM size depends on initial RAM and device memory settings */
     [VIRT_MEM] =                { GiB, LEGACY_RAMLIMIT_BYTES },
+};
+
+enum {
+    VE_SYSREGS,
+    VE_SP810,
+    VE_SERIALPCI,
+    VE_PL041,
+    VE_MMCI,
+    VE_KMI0,
+    VE_KMI1,
+    VE_UART0,
+    VE_UART1,
+    VE_UART2,
+    VE_UART3,
+    VE_WDT,
+    VE_TIMER01,
+    VE_TIMER23,
+    VE_SERIALDVI,
+    VE_RTC,
+    VE_COMPACTFLASH,
+    VE_CLCD,
+    VE_NORFLASH0,
+    VE_NORFLASH1,
+    VE_NORFLASHALIAS,
+    VE_SRAM,
+    VE_VIDEORAM,
+    VE_ETHERNET,
+    VE_USB,
+    VE_DAPROM,
+    VE_VIRTIO,
+};
+
+static hwaddr motherboard_legacy_map[] = {
+    [VE_SERIALDVI] = 0x10016000,
 };
 
 /*
@@ -2081,6 +2117,8 @@ static void machvirt_init(MachineState *machine)
     bool has_ged = !vmc->no_ged;
     unsigned int smp_cpus = machine->smp.cpus;
     unsigned int max_cpus = machine->smp.max_cpus;
+    I2CBus *i2c;
+    DeviceState *dev;
 
     possible_cpus = mc->possible_cpu_arch_ids(machine);
 
@@ -2377,6 +2415,10 @@ static void machvirt_init(MachineState *machine)
     vms->bootinfo.firmware_loaded = firmware_loaded;
     vms->bootinfo.psci_conduit = vms->psci_conduit;
     arm_load_kernel(ARM_CPU(first_cpu), machine, &vms->bootinfo);
+
+    dev = sysbus_create_simple(TYPE_ARM_SBCON_I2C, motherboard_legacy_map[VE_SERIALDVI], NULL);
+    i2c = (I2CBus *)qdev_get_child_bus(dev, "i2c");
+    i2c_slave_create_simple(i2c, "at24c-eeprom", 0x50);
 
     vms->machine_done.notify = virt_machine_done;
     qemu_add_machine_init_done_notifier(&vms->machine_done);

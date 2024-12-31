@@ -25,10 +25,10 @@
 #include <linux/gpio.h>/*gpio接口函数*/
 #include <linux/of.h>/*设备树操作相关的函数*/
 #include <linux/fs.h>//file_operations结构体
-#include <asm/gpio.h>/*gpio接口函数*/
+#include <linux/gpio.h>/*gpio接口函数*/
 #include <asm/uaccess.h>/*__copy_from_user 接口函数*/
 
-#define I2C_DEVICE_NAME "i2c-3"
+#define I2C_DEVICE_NAME "i2c-0"
 #define I2C_DEVICE_SIZE  256  /*24c02 为256字节*/
 #define I2C_DEVICE_COUNT 1
 
@@ -247,6 +247,25 @@ int ret = -EINVAL;
 }
 
 static ssize_t i2c_dev_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos) {
+#if 1
+	int ret;
+	char *tmp;
+	struct i2c_client *client = file->private_data;
+
+	if (count > 8192)
+		count = 8192;
+
+	tmp = memdup_user(buf, count);
+	if (IS_ERR(tmp))
+		return PTR_ERR(tmp);
+
+	printk("i2c-dev: i2c-%d writing %zu bytes.\n",
+		iminor(file_inode(file)), count);
+
+	ret = i2c_master_send(client, tmp, count);
+	kfree(tmp);
+	return ret;
+#else
     int ret = -EINVAL;
 	char *buffer;/*缓冲区*/
 	unsigned char pages;/*页数*/
@@ -297,20 +316,52 @@ static ssize_t i2c_dev_write(struct file *file, const char __user *buf, size_t c
    	kfree(buffer);
   	// devm_kfree(&dev->client->dev,buffer);
 	return 0;
+#endif
 }
 
 static int i2c_dev_open(struct inode *inode, struct file *file) {
     // 打开设备时的处理
-	printk("ready i2c_dev_open");
-	struct i2c_dev *i2c = file->private_data;
-	i2c->use_smbus = 0;
-	i2c->use_smbus_write = 0; 
+#if 1
+	unsigned int minor = iminor(inode);
+	struct i2c_dev *i2c;
+	struct i2c_client *client;
+	struct i2c_adapter *adap;
+
+	adap = i2c_get_adapter(minor);
+	if (!adap){
+		printk("error");
+		return -ENODEV;
+	}
+
+	client = kzalloc(sizeof(*client), GFP_KERNEL);
+	if (!client) {
+		i2c_put_adapter(adap);
+		return -ENOMEM;
+	}
+	snprintf(client->name, I2C_NAME_SIZE, "i2c-dev %d", adap->nr);
+
+	client->adapter = adap;
+	file->private_data = client;
+#else
+    file->private_data = i2c;
+    if (!i2c) {
+        printk(KERN_ERR "i2c_dev_open: file->private_data is NULL\n");
+        return -EINVAL; // 返回一个错误码
+    }
+    i2c->use_smbus = 0;
+    i2c->use_smbus_write = 0; 
+#endif
     return 0;
 }
 
 static int i2c_dev_release(struct inode *inode, struct file *file) {
-	printk("ready i2c_dev_release");
     // 关闭设备时的处理
+	struct i2c_client *client = file->private_data;
+
+	i2c_put_adapter(client->adapter);
+	kfree(client);
+	file->private_data = NULL;
+	
     return 0;
 }
 
@@ -369,7 +420,7 @@ static int i2c_dev_probe(struct platform_device *dev)
 	struct resource *r;
 	int ret;
 
-	printk("i2c test test\n");
+	printk("i2c test probe\n");
 	i2c = devm_kzalloc(&dev->dev, sizeof(struct i2c_dev), GFP_KERNEL);
 	if (!i2c)
 		return -ENOMEM;
