@@ -1768,6 +1768,7 @@ void __init page_alloc_init_late(void)
 
 	for_each_populated_zone(zone)
 		set_zone_contiguous(zone);
+	//遍历所有已填充的区域，并设置它们的连续性。这有助于优化内存分配。
 }
 
 #ifdef CONFIG_CMA

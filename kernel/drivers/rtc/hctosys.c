@@ -75,3 +75,5 @@ err_open:
 }
 
 late_initcall(rtc_hctosys);
+// late_initcall宏将rtc_hctosys函数添加到内核的延迟初始化列表中，
+// 这样rtc_hctosys函数会在内核完成基本初始化后、设备驱动程序加载之前被调用。

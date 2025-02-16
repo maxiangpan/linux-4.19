@@ -5848,6 +5848,7 @@ int __init workqueue_init(void)
 
 	list_for_each_entry(wq, &workqueues, list) {
 		wq_update_unbound_numa(wq, smp_processor_id(), true);
+		//这段代码遍历系统中所有可能的CPU，并为每个CPU设置对应的工作池节点
 		WARN(init_rescuer(wq),
 		     "workqueue: failed to create early rescuer for %s",
 		     wq->name);

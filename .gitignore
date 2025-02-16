@@ -10,3 +10,5 @@ qemu/arm/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi/gcc-linaro-7.5.0-2019
 qemu/arm/arm-linux-gnueabi
 qemu/arm/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi
 qemu/output
+rk3399/mega/camera/out
+rk3399/mega/camera/*.mp4

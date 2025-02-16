@@ -25,6 +25,24 @@ function finish_build(){
 	cd $CURRENT_DIR
 }
 
+function build_env(){
+	export KERNEL_DTS=te_vxpress
+    export ARCH=$TE_ARCH
+	export CROSS_COMPILE=$TE_CROSS_COMPILE #qemu arm64 编译环境
+    # export KERNEL_DEFCONFIG=te64_defconfig
+    # export BUILDROOT_DEFCONFIG=te64_defconfig
+    # export UBOOT_DEFCONFIG=te64_defconfig
+    # echo "=============================================="
+    # echo "TE_ARCH   =$TE_ARCH"
+    # echo "TE_CROSS_COMPILE =$TE_CROSS_COMPILE"
+    # echo "KERNEL_DEFCONFIG =$KERNEL_DEFCONFIG"
+    # echo "BUILDROOT_DEFCONFIG =$BUILDROOT_DEFCONFIG"
+    # echo "UBOOT_DEFCONFIG =$UBOOT_DEFCONFIG"
+    # echo "=============================================="
+
+    echo "env export success"
+}
+
 function config(){
 
     KERNEL_DTS=te_vxpress
@@ -47,6 +65,8 @@ function config(){
         #arm编译环境
         #如果内核使用EABI接口那么buildroot也应当使用EABI
     fi
+
+    build_env
     #TE_CROSS_COMPILE=${CURRENT_DIR}/buildroot/output/host/bin/aarch64-buildroot-linux-gnu-
 }
 
@@ -120,8 +140,15 @@ function build_buildroot(){
     #sudo make busybox-menuconfig
     #make busybox-update-config
 
+    # busybox的改动在output/build/busybox-1.36.1
+    # git diff > buildroot/package/busybox/busybox-init.patch
+
     cd buildroot
+
+    source save_config.sh
     
+    make busybox-rebuild ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE
+
     make $BUILDROOT_DEFCONFIG
     /usr/bin/time -f "you take %E to build" make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
 

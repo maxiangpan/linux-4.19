@@ -403,14 +403,22 @@ static noinline void __ref rest_init(void)
 	 * we schedule it before we create kthreadd, will OOPS.
 	 */
 	pid = kernel_thread(kernel_init, NULL, CLONE_FS);
+	//创建init 进程
 	/*
 	 * Pin init on the boot CPU. Task migration is not properly working
 	 * until sched_init_smp() has been run. It will set the allowed
 	 * CPUs for init to the non isolated CPUs.
 	 */
 	rcu_read_lock();
+	//rcu lock 是为了保护临界区资源，RCU允许在读取期间进行写操作，写操作在完成时通知所有读取者，读取者收到通知后可以重新读取数据
 	tsk = find_task_by_pid_ns(pid, &init_pid_ns);
+	//找到刚刚创建的init进程
+	//nr：要查找的进程 ID（PID），是一个 pid_t 类型的整数。
+	//ns：指定的进程命名空间，是一个指向 struct pid_namespace 结构体的指针。进程命名空间是 Linux 内核提供的一种隔离机制，不同的命名空间可以有相同的 PID，通过指定命名空间可以准确地定位到目标进程
+	printk("init process pid is %d\n", pid);
 	set_cpus_allowed_ptr(tsk, cpumask_of(smp_processor_id()));
+	// printk("cpummask is %d",cpumask_of(smp_processor_id()));
+	// 任务 tsk 绑定到当前 CPU 上运行，限制其不能迁移到其他 CPU。这种操作通常用于优化性能或确保任务在特定 CPU 上执行
 	rcu_read_unlock();
 
 	numa_default_policy();
@@ -436,6 +444,7 @@ static noinline void __ref rest_init(void)
 	 */
 	schedule_preempt_disabled();
 	/* Call into cpu_idle with preempt disabled */
+	printk("cpu_idle end\n");
 	cpu_startup_entry(CPUHP_ONLINE);
 }
 
@@ -586,21 +595,21 @@ asmlinkage __visible void __init start_kernel(void)
 	 * These use large bootmem allocations and must precede
 	 * kmem_cache_init()
 	 */
-	// 初始化日志缓冲区
+	// 初始化日志缓冲区 使用memblock_alloc分配一个启动时log缓冲区
 	setup_log_buf(0);
-	// 初始化VFS缓存
-	vfs_caches_init_early();
-	// 初始化主扩展表
+	// 初始化VFS缓存 初始化dentry和inode的hashtable
+	vfs_caches_init_early(); 
+	// 初始化主扩展表 对内核异常向量表进行排序
 	sort_main_extable();
-	// 初始化中断
+	// 初始化中断 :对内核陷阱异常进行初始化
 	trap_init();
-	// 初始化内存管理
+	// 初始化内存管理 主要功能就是将memblock管理的空闲内存释放到伙伴系统
 	mm_init();
 
-	//初始化ftrace
+	//初始化ftrace ftrace子系统初始化
 	ftrace_init();
 
-	/* trace_printk can be enabled here */
+	/* trace_printk can be enabled here trace_printk被使能 */ 
 	early_trace_init();
 
 	/*
@@ -625,7 +634,7 @@ asmlinkage __visible void __init start_kernel(void)
 	 * Set up housekeeping before setting up workqueues to allow the unbound
 	 * workqueue to take non-housekeeping into account.
 	 */
-	// 初始化清理程序
+	// 初始化内核基数树
 	housekeeping_init();
 
 	/*
@@ -652,19 +661,28 @@ asmlinkage __visible void __init start_kernel(void)
 	/* init some links before init_ISA_irqs() */
 	// 初始化硬件中断
 	early_irq_init();
-	// 初始化中断
+	// 初始化中断 初始化中断数目nr_irqs，并通过for循环为每个中断分配中断描述符irq_desc，置位allocated_irqs表示该中断已经分配中断描述符，irq_insert_desc将分配的中断描述符插入到irq_desc_tree基数树
 	init_IRQ();
-	// 初始化定时器
+	// 初始化定时器 初始化中断，包括中断栈的初始化，中断控制器的初始化
 	tick_init();
+	/* 参考:https://blog.csdn.net/flaoter/article/details/77413163
+		对于ARM64底层硬件而言，有一个全局的global counter，同时每个cpu core有一个本地的local timer，linux据此抽象出了clock event和clock source。
+		(1) clock source实现计时功能，linux内核有各种time line, 包括real time clock, monotonic clock, monotonic raw clock等。clocksource提供了一个单调增加的计时器产生tick，为timeline提供时钟源。timekeeper是内核提供时间服务的基础模块，负责选择并维护最优的clocksource;
+		(2) clock event实现定时功能。clock event管理可产生event或是触发中断的定时器， 一般而言，每个CPU形成自己的一个小系统，也就要管理自己的clock event。tick device是基于clock event设备进行工作的，cpu管理自己的调度、进程统计等是基于tick device的。低精度timer和高精度timer都是基于tick device生成的定时器设备*/
+	/*from: http://www.wowotech.net/timer_subsystem/periodic-tick.html
+		在multi core的环境下，每一个CPU core都自己的tick device（可以称之local tick device），这些tick device中有一个被选择做global tick device，
+		负责维护整个系统的jiffies。如果该tick device的是第一次设定，并且目前系统中没有global tick设备，那么可以考虑选择该tick设备作为global设备，
+		进行系统时间和jiffies的更新。更细节的内容请参考timekeeping文档*/
+	
 	// 初始化非高速硬件定时器
 	rcu_init_nohz();
-	// 初始化定时器
+	// 初始化定时器 初始化各个cpu core的timer, 注册timer软中断
 	init_timers();
-	// 初始化硬件定时器
+	// 初始化硬件定时器 初始各个cpu core的hr timer，注册hr timer软中断
 	hrtimers_init();
-	// 初始化软件中断
+	// 初始化软件中断 初始化各个cpu core的tasklet和tasklet_hi链表，注册tasklet和tasklet_hi软中断
 	softirq_init();
-	// 初始化时间管理
+	// 初始化时间管理 初始化时钟源和common timekeeping values
 	timekeeping_init();
 	// 初始化时间
 	time_init();
@@ -1076,6 +1094,22 @@ static int run_init_process(const char *init_filename)
 {
 	argv_init[0] = init_filename;
 	pr_info("Run %s as init process\n", init_filename);
+
+	// getname_kernel 函数用于获取一个指向用户空间字符串的内核副本。
+	// 在 Linux 内核中，内核代码通常不能直接访问用户空间的内存，因此需要将用户空间的字符串复制到内核空间。
+
+	// argv_init 是一个字符串数组，包含传递给新程序的命令行参数。
+	// __user 是一个内核宏，用于标记这是一个指向用户空间的指针。
+	// 这里将 argv_init 强制转换为 const char __user *const __user * 类型，
+	// 表示这是一个指向用户空间字符串数组的指针，用于传递给 do_execve 函数
+
+	// envp_init 是一个字符串数组，包含传递给新程序的环境变量。
+	// 同样，通过强制转换为 const char __user *const __user * 类型，
+	// 表示这是一个指向用户空间字符串数组的指针，用于传递给 do_execve 函数。
+
+	// 内核空间执行sbin/init
+	// 设置栈和环境变量：将 argv 和 envp 中的命令行参数和环境变量复制到新程序的栈中，以便新程序可以访问这些信息。
+	// 调用 do_execve 函数：do_execve 函数会执行 execve 系统调用，将当前进程替换为新程序。
 	return do_execve(getname_kernel(init_filename),
 		(const char __user *const __user *)argv_init,
 		(const char __user *const __user *)envp_init);
@@ -1168,6 +1202,7 @@ static int __ref kernel_init(void *unused)
 	 * The Bourne shell can be used instead of init if we are
 	 * trying to recover a really broken machine.
 	 */
+	printk("execute_command: %s , ramdisk_execute_command : %s", execute_command, ramdisk_execute_command);
 	if (execute_command) {
 		ret = run_init_process(execute_command);
 		if (!ret)
@@ -1175,6 +1210,10 @@ static int __ref kernel_init(void *unused)
 		panic("Requested init %s failed (error %d).",
 		      execute_command, ret);
 	}
+
+	printk("_____switch to rootfs _________");
+	printk("entry usernamespace init rootfs :");
+
 	if (!try_to_run_init_process("/sbin/init") ||
 	    !try_to_run_init_process("/etc/init") ||
 	    !try_to_run_init_process("/bin/init") ||
@@ -1194,15 +1233,19 @@ static noinline void __init kernel_init_freeable(void)
 
 	/* Now the scheduler is fully set up and can do blocking allocations */
 	gfp_allowed_mask = __GFP_BITS_MASK;
+	//表示允许内核进行所有类型的内存分配
 
 	/*
 	 * init can allocate pages on any node
 	 */
 	set_mems_allowed(node_states[N_MEMORY]);
+	//设置允许内存分配的节点（NUMA节点）
 
 	cad_pid = get_pid(task_pid(current));
+	printk("kernel_init_freeable: pid = %d",pid_nr(cad_pid));
 
 	smp_prepare_cpus(setup_max_cpus);
+	//准备多核处理器（SMP）环境
 
 	workqueue_init();
 
@@ -1223,6 +1266,16 @@ static noinline void __init kernel_init_freeable(void)
 	/* Open the /dev/console on the rootfs, this should never fail */
 	if (ksys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)
 		pr_err("Warning: unable to open an initial console.\n");
+
+	// struct file *file;
+	// mm_segment_t old_fs;
+	// file = filp_open("/dev/console", O_RDWR, 0);
+	// old_fs = get_fs();
+	// set_fs(KERNEL_DS);
+
+	// vfs_write(file, "hello world", 11 ,&file->f_pos);
+	// set_fs(old_fs);
+	// filp_close(file, NULL);
 
 	(void) ksys_dup(0);
 	(void) ksys_dup(0);
