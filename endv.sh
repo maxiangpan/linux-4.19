@@ -6,6 +6,8 @@ function default(){
     echo "***********************"
     echo "*1.qemu_env           *"
     echo "*2.opengrok_env       *"  
+    echo "*3.clangd             *"
+    echo "*4.jekins             *"
     echo "***********************"
 }
 
@@ -444,6 +446,34 @@ function clangd_env(){
     echo "https://blog.csdn.net/ludaoyi88/article/details/135051470#:~:text=%E7%9C%8B%E4%BB%A3%E7%A0%81%E7%A5%9E%E5%99%A8%EF%BC%9Avs#:~:text=%E7%9C%8B%E4%BB%A3%E7%A0%81%E7%A5%9E%E5%99%A8%EF%BC%9Avs"
 }
 
+function jekins_env(){
+    sudo apt update
+    sudo apt install -y openjdk-17-jre-headless
+    # sudo apt install openjdk-11-jdk -y
+    java -version
+    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
+        /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+    echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+        https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+        /etc/apt/sources.list.d/jenkins.list > /dev/null
+    sudo apt update
+    sudo apt install jenkins -y
+    if [ $? -ne 0 ]; then
+        sudo rm /var/lib/dpkg/info/jenkins.*
+        sudo dpkg --configure -a
+        sudo apt-get update
+        sudo apt-get install jenkins
+    fi
+    sudo systemctl start jenkins
+    sudo systemctl enable jenkins
+    sudo systemctl status jenkins
+    sudo ufw allow 8080
+    sudo ufw reload
+    jenkins version
+    echo "if reload failed , please use sudo update-alternatives --config java"
+    echo "sudo systemctl restart jenkins"
+}
+
 OPTIONS="${@:-default}"
 
 default
@@ -457,6 +487,8 @@ for option in "${OPTIONS[@]}"; do
             opengrok_env ;;
         "clangd"|"3")
             clangd_env ;;
+        "jekins"|"4")
+            jekins_env ;;
         *)
             echo "Invalid option" ;;
     esac
