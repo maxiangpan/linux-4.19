@@ -90,6 +90,11 @@ function build_kernel(){
     echo "=============================================="
 
     cd kernel
+
+    if [ "$TE_ARCH" = "arm64" ]; then
+        cp .config ./arch/arm64/configs/te64_defconfig
+    else
+        cp .config ./arch/arm/configs/te_defconfig
     
     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE $KERNEL_DEFCONFIG
     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE dtbs
