@@ -8,3 +8,5 @@ pushd output/build/busybox-1.36.1
 # git diff . > $CURRENT_DIR/package/busybox/busybox-init.patch
 echo "diff -Naur init.c init.c.bak > busybox-init.patch"
 popd
+
+cp ./package/busybox/inittab ./output/target/etc/inittab

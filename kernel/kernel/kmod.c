@@ -40,7 +40,7 @@
  * would take effect. Systems like these are very unlikely if modules are
  * enabled.
  */
-#define MAX_KMOD_CONCURRENT 50
+#define MAX_KMOD_CONCURRENT 100
 static atomic_t kmod_concurrent_max = ATOMIC_INIT(MAX_KMOD_CONCURRENT);
 static DECLARE_WAIT_QUEUE_HEAD(kmod_wq);
 

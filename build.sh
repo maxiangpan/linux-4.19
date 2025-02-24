@@ -26,7 +26,7 @@ function finish_build(){
 }
 
 function build_env(){
-	export KERNEL_DTS=te_vxpress
+	export KERNEL_DTS='te_vxpress.dts'
     export ARCH=$TE_ARCH
 	export CROSS_COMPILE=$TE_CROSS_COMPILE #qemu arm64 编译环境
     # export KERNEL_DEFCONFIG=te64_defconfig
@@ -45,7 +45,7 @@ function build_env(){
 
 function config(){
 
-    KERNEL_DTS=te_vxpress
+    KERNEL_DTS='te_vxpress.dts'
     #获取vexpress默认config
     #make CROSS_COMPILE=$cross_compile ARCH=arm vexpress_defconfig
 
@@ -95,6 +95,7 @@ function build_kernel(){
         cp .config ./arch/arm64/configs/te64_defconfig
     else
         cp .config ./arch/arm/configs/te_defconfig
+    fi
     
     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE $KERNEL_DEFCONFIG
     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE dtbs
@@ -247,14 +248,12 @@ function start_qemu(){
     #./qemu/output/bin/qemu-system-aarch64 -device help | grep i2c
     #https://quard-star-tutorial.readthedocs.io/zh-cn/latest/ch16.html
         exec $CURRENT_DIR/qemu/output/bin/qemu-system-aarch64 -M virt \
-        -smp 2 -m 1G -nographic \
+        -smp 2 -m 4G -nographic \
         -cpu cortex-a53 \
         -machine type=virt \
         -dtb ${CURRENT_DIR}/kernel/arch/arm64/boot/dts/te/qemu-virt.dtb \
         -kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
         -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
-        -netdev user,id=eth0 \
-        -device virtio-net-device,netdev=eth0 \
         -device virtio-gpu-device,id=video0,xres=1280,yres=720 \
         -device at24c-eeprom,id=i2c0,address=0x50,rom-size=1024 \
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
