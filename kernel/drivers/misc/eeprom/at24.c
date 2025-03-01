@@ -631,11 +631,12 @@ static int at24_probe(struct i2c_client *client)
 	u8 test_byte;
 	int err;
 
+	printk(KERN_INFO "at24_probe enter");
+	
 	i2c_fn_i2c = i2c_check_functionality(client->adapter, I2C_FUNC_I2C);
 	i2c_fn_block = i2c_check_functionality(client->adapter,
 					       I2C_FUNC_SMBUS_WRITE_I2C_BLOCK);
 
-	printk("i2c_test_1");
 	err = at24_get_pdata(dev, &pdata);
 	if (err)
 		return err;

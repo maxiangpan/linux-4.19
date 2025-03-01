@@ -239,6 +239,14 @@ function start_qemu(){
     #-append "console=ttyAMA0 kmemleak=on loglevel=8" \
     #-dtb  ${CURRENT_DIR}/kernel/arch/arm/boot/dts/vexpress-v2p-ca9.dtb \
     #-kernel ${CURRENT_DIR}/u-boot/u-boot \
+    if [ -f "${CURRENT_DIR}/devices/virt/eeprom" ]; then
+        echo "rom exist"
+    else
+        echo "rom not exist will create rom 1k ... "
+        pushd ${CURRENT_DIR}/devices/virt
+        dd if=/dev/zero of=./eeprom bs=1k count=1
+        popd
+    fi
     if [ "$TE_ARCH" = "arm64" ]; then
     #--fsdev local,id=kmod_dev,path=$PWD/kmodules,security_model=none`
     #创建一个本地文件系统设备，其中`id`指定设备ID，`path`指定设备挂载的本地路径，`security_model`指定安全模型。
@@ -255,13 +263,17 @@ function start_qemu(){
         -kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
         -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
         -device virtio-gpu-device,id=video0,xres=1280,yres=720 \
-        -device at24c-eeprom,id=i2c0,address=0x50,rom-size=1024 \
+        -device at24c-eeprom,rom-size=1024,id=eeprom0,address=0x50,address-size=1 \
+        -drive file=${CURRENT_DIR}/devices/virt/eeprom,format=raw,id=eeprom0,if=none \
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
         -D /tmp/qemu-debug-log \
-        -monitor pty 
+        -monitor telnet:127.0.0.1:4444,server,nowait
 
         #-monitor telnet:127.0.0.1:4444,server,nowait 查看qemu log
-        #
+        #-device at24c-eeprom,rom-size=32768,id=eeprom0,address=0x50 \
+        #https://blog.csdn.net/yanghuajia/article/details/143603917
+        #https://blog.csdn.net/weixin_30300523/article/details/98040130?spm=1001.2101.3001.6650.3&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogOpenSearchComplete%7ERate-3-98040130-blog-143603917.235%5Ev43%5Epc_blog_bottom_relevance_base6&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogOpenSearchComplete%7ERate-3-98040130-blog-143603917.235%5Ev43%5Epc_blog_bottom_relevance_base6&utm_relevant_index=4
+        #dd if=/dev/zero of=./rom bs=1M count=1024
         #-bios ${CURRENT_DIR}/u-boot/u-boot.bin \
         #qemu virt没有SD卡设备
         #-netdev user,id=eth0 -device virtio-net-device,netdev=eth0 -drive file=rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@"

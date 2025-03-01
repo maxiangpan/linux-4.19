@@ -1014,6 +1014,8 @@ static int ov5642_probe(struct i2c_client *client,
 	struct soc_camera_subdev_desc *ssdd = soc_camera_i2c_to_desc(client);
 	int ret;
 
+	printk("ov5642_probe enter ");
+	
 	if (!ssdd) {
 		dev_err(&client->dev, "OV5642: missing platform data!\n");
 		return -EINVAL;
