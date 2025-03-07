@@ -262,10 +262,10 @@ function start_qemu(){
         -dtb ${CURRENT_DIR}/kernel/arch/arm64/boot/dts/te/qemu-virt.dtb \
         -kernel ${CURRENT_DIR}/kernel/arch/arm64/boot/Image \
         -append "noinitrd root=/dev/vda rw console=ttyAMA0,115200 loglevel=8" \
-        -device virtio-gpu-device,id=video0,xres=1280,yres=720 \
-        -device at24c-eeprom,rom-size=1024,id=eeprom0,address=0x50,address-size=1 \
-        -drive file=${CURRENT_DIR}/devices/virt/eeprom,format=raw,id=eeprom0,if=none \
+        -drive file=${CURRENT_DIR}/devices/virt/eeprom,format=raw,id=eeprom0,if=none,cache=unsafe \
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
+        -device at24c-eeprom,rom-size=1024,id=eeprom0,address=0x50,address-size=1 \
+        -device virtio-gpu-device,id=video0,xres=1280,yres=720 \
         -D /tmp/qemu-debug-log \
         -monitor telnet:127.0.0.1:4444,server,nowait
 
