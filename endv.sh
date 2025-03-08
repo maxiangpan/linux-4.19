@@ -8,6 +8,7 @@ function default(){
     echo "*2.opengrok_env       *"  
     echo "*3.clangd             *"
     echo "*4.jekins             *"
+    echo "*5.gerrit             *"
     echo "***********************"
 }
 
@@ -36,13 +37,15 @@ function qemu_env(){
 
 #qemu
     sudo apt install -y libgtk-3-dev
+    sudo apt-get install -y libslirp-dev
     cd qemu
     sudo apt -y install ninja-build build-essential zlib1g-dev pkg-config libglib2.0-dev binutils-dev libpixman-1-dev libfdt-dev
     sudo apt-get -y install libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
-    #mkdir build && cd build
-    #../configure --enable-kvm --target-list=x86_64-softmmu --enable-debug
-    #make -j$(nproc)
-    #sudo make install
+    mkdir build && cd build
+    # ../configure --enable-kvm --target-list=x86_64-softmmu --enable-debug
+    ./configure --enable-slirp
+    make -j$(nproc)
+    sudo make install
 
     if [ ! -d $CURRENT_DIR/tools ]; then
         mkdir $CURRENT_DIR/tools && cd $CURRENT_DIR/tools
@@ -466,18 +469,36 @@ function jekins_env(){
     fi
     sudo systemctl start jenkins
     sudo systemctl enable jenkins
-    sudo systemctl status jenkins
+    # sudo systemctl status jenkins
     sudo ufw allow 8080
     sudo ufw reload
-    jenkins version
+    # jenkins version
     echo "if reload failed , please use sudo update-alternatives --config java"
     echo "sudo systemctl restart jenkins"
+    echo "Adding jenkins user to sudoers"
+    echo "jenkins ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/jenkins
+    sudo chmod 0440 /etc/sudoers.d/jenkins
+    sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+    sudo systemctl status jenkins | grep -- --httpPort
+    echo "if login error : sudo sed -i 's/<useSecurity>true</<useSecurity>false</g' /var/lib/jenkins/config.xml"
+}
+
+function gerrit_env(){
+    echo "参考 : https://blog.csdn.net/tq08g2z/article/details/78627653"
+    sudo apt-get install -y mysql-server mysql-client libmysqlclient-dev
+    # wget https://gerrit-releases.storage.googleapis.com/gerrit-3.9.3.war
+    # java -jar gerrit-3.9.3.war init -d review_site
 }
 
 OPTIONS="${@:-default}"
 
 default
-read -p "Choose your current operation: " choice
+
+if [ "$OPTIONS" = "default" ]; then
+    read -p "Choose your current operation : " choice
+else
+    choice="$OPTIONS"
+fi
 
 for option in "${OPTIONS[@]}"; do
     case $choice in
@@ -489,6 +510,8 @@ for option in "${OPTIONS[@]}"; do
             clangd_env ;;
         "jekins"|"4")
             jekins_env ;;
+        "gerrit"|"5")
+            gerrit_env;;
         *)
             echo "Invalid option" ;;
     esac

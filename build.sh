@@ -91,10 +91,12 @@ function build_kernel(){
 
     cd kernel
 
-    if [ "$TE_ARCH" = "arm64" ]; then
-        cp .config ./arch/arm64/configs/te64_defconfig
-    else
-        cp .config ./arch/arm/configs/te_defconfig
+    if [ -f ".config" ]; then
+        if [ "$TE_ARCH" = "arm64" ]; then
+            cp .config ./arch/arm64/configs/te64_defconfig
+        else
+            cp .config ./arch/arm/configs/te_defconfig
+        fi
     fi
     
     make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE $KERNEL_DEFCONFIG
@@ -151,9 +153,10 @@ function build_buildroot(){
 
     cd buildroot
 
-    source save_config.sh
-    
-    make busybox-rebuild ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE
+    if [ -f ".config" ]; then
+        source save_config.sh
+        make busybox-rebuild ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE
+    fi
 
     make $BUILDROOT_DEFCONFIG
     /usr/bin/time -f "you take %E to build" make ARCH=$TE_ARCH CROSS_COMPILE=$TE_CROSS_COMPILE -j$TE_JOBS
@@ -174,19 +177,17 @@ function build_img(){
 }
 
 function build_qemu(){
-    SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
     cd qemu
-    if [ ! -d "$SHELL_FOLDER/qemu/output" ]; then
+    if [ ! -d "$CURRENT_DIR/qemu/output" ]; then
         if [ "$TE_ARCH" = "arm64" ]; then
             ./configure --prefix=$SHELL_FOLDER/qemu/output  --target-list=aarch64-softmmu --enable-gtk  --enable-virtfs --disable-gio
         else
             ./configure --prefix=$SHELL_FOLDER/qemu/output  --target-list=arm-softmmu --enable-gtk  --enable-virtfs --disable-gio
         fi
-    fi  
-    make -j16
-    make install
-    cd ..
-
+        make -j16
+        make install
+    fi
+    finish_build
 }
 
 function clean_all(){
@@ -266,6 +267,8 @@ function start_qemu(){
         -drive file=${CURRENT_DIR}/buildroot/output/images/rootfs.ext4,if=none,format=raw,id=hd0 -device virtio-blk-device,drive=hd0  ${EXTRA_ARGS} "$@" \
         -device at24c-eeprom,rom-size=1024,id=eeprom0,address=0x50,address-size=1 \
         -device virtio-gpu-device,id=video0,xres=1280,yres=720 \
+        -netdev user,id=eth0 \
+        -device virtio-net-device,netdev=eth0 \
         -D /tmp/qemu-debug-log \
         -monitor telnet:127.0.0.1:4444,server,nowait
 
@@ -294,7 +297,7 @@ function start_qemu(){
         -append "console=ttyAMA0,115200 root=/dev/mmcblk0p2 rw rootwait" \
         -device at24c-eeprom,id=i2c-bus,address=0x50,rom-size=1024 \
         -netdev user,id=eth0 \
-        -device virtio-net-device,netdev=eth0 \
+        -device virtio-net-device,netdev=eth0 
         # -display sdl
         #-monitor telnet:127.0.0.1:4444,server,nowait
 

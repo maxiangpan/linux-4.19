@@ -40,6 +40,9 @@
 
 #include "internal.h"
 
+static atomic_long_t kmalloc_count;
+static atomic_long_t kfree_count;
+
 /*
  * Lock order:
  *   1. slab_mutex (Global Mutex)
@@ -2771,6 +2774,7 @@ EXPORT_SYMBOL(kmem_cache_alloc);
 #ifdef CONFIG_TRACING
 void *kmem_cache_alloc_trace(struct kmem_cache *s, gfp_t gfpflags, size_t size)
 {
+	atomic_long_inc(&kmalloc_count);
 	void *ret = slab_alloc(s, gfpflags, _RET_IP_);
 	trace_kmalloc(_RET_IP_, ret, size, s->size, gfpflags);
 	kasan_kmalloc(s, ret, size, gfpflags);
@@ -3948,6 +3952,7 @@ void kfree(const void *x)
 	struct page *page;
 	void *object = (void *)x;
 
+	atomic_long_inc(&kfree_count);
 	trace_kfree(_RET_IP_, x);
 
 	if (unlikely(ZERO_OR_NULL_PTR(x)))
@@ -3961,6 +3966,9 @@ void kfree(const void *x)
 		return;
 	}
 	slab_free(page->slab_cache, page, object, NULL, 1, _RET_IP_);
+	pr_info("Kernel memory stats: kmalloc=%ld kfree=%ld",
+		atomic_long_read(&kmalloc_count),
+		atomic_long_read(&kfree_count));
 }
 EXPORT_SYMBOL(kfree);
 
