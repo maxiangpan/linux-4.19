@@ -41,8 +41,11 @@ function qemu_env(){
     cd qemu
     sudo apt -y install ninja-build build-essential zlib1g-dev pkg-config libglib2.0-dev binutils-dev libpixman-1-dev libfdt-dev
     sudo apt-get -y install libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
-    mkdir build && cd build
+    # mkdir build && cd build
     # ../configure --enable-kvm --target-list=x86_64-softmmu --enable-debug
+    if [ -d "build" ]; then
+        rm -rf build
+    fi
     ./configure --enable-slirp
     make -j$(nproc)
     sudo make install
